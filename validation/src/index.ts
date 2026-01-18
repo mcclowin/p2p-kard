@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
+import cors from 'cors';
 import { ValidationEngine } from './engine/index.js';
 import type { ValidationRequest } from './types/index.js';
 import { ValidationConfig } from './config/validation.config.js';
@@ -10,6 +11,18 @@ import { diditProvider } from './providers/idv/DiditProvider.js';
 import { ofacProvider } from './providers/sanctions/OfacProvider.js';
 
 const app = express();
+
+// CORS - allow frontend origins
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',  // Vite dev server
+    'http://127.0.0.1:5173',
+    process.env.FRONTEND_URL || '',
+  ].filter(Boolean),
+  credentials: true,
+}));
+
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
@@ -67,18 +80,18 @@ app.get('/api/v1/bank/callback', async (req, res) => {
 
     if (error) {
       console.error(`[BANK] OAuth error: ${error}`);
-      return res.redirect(`${FRONTEND_URL}/bank-link?error=${error}`);
+      return res.redirect(`${FRONTEND_URL}/app/borrower/apply?bank_error=${error}`);
     }
 
     if (!code || !state) {
-      return res.redirect(`${FRONTEND_URL}/bank-link?error=missing_params`);
+      return res.redirect(`${FRONTEND_URL}/app/borrower/apply?bank_error=missing_params`);
     }
 
     // Find user by state
     const userState = userStateManager.findByBankSessionState(state as string);
     if (!userState) {
       console.error(`[BANK] Invalid state: ${state}`);
-      return res.redirect(`${FRONTEND_URL}/bank-link?error=invalid_state`);
+      return res.redirect(`${FRONTEND_URL}/app/borrower/apply?bank_error=invalid_state`);
     }
 
     console.log(`[BANK] Callback received for user ${userState.userId}`);
@@ -97,10 +110,10 @@ app.get('/api/v1/bank/callback', async (req, res) => {
 
     console.log(`[BANK] User ${userState.userId} bank linked successfully`);
 
-    res.redirect(`${FRONTEND_URL}/bank-link?success=true`);
+    res.redirect(`${FRONTEND_URL}/app/borrower/apply?bank_success=true`);
   } catch (err) {
     console.error('[BANK] Callback error:', err);
-    res.redirect(`${FRONTEND_URL}/bank-link?error=exchange_failed`);
+    res.redirect(`${FRONTEND_URL}/app/borrower/apply?bank_error=exchange_failed`);
   }
 });
 
@@ -150,6 +163,55 @@ app.get('/api/v1/idv/session/:sessionId', async (req, res) => {
   } catch (err) {
     console.error('[IDV] Error getting session result:', err);
     res.status(500).json({ error: 'Failed to get IDV result' });
+  }
+});
+
+// Refresh/check IDV status for a user (polls Didit API)
+app.post('/api/v1/idv/refresh/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const state = userStateManager.get(userId);
+
+    if (!state.idvSessionId) {
+      return res.json({ idvStatus: 'none', message: 'No IDV session found' });
+    }
+
+    // If already verified, return current status
+    if (state.idvStatus === 'verified') {
+      return res.json({ idvStatus: 'verified', message: 'Already verified' });
+    }
+
+    // Poll Didit for the result
+    console.log(`[IDV] Refreshing status for user ${userId}, session ${state.idvSessionId}`);
+    const result = await diditProvider.getSessionResult(state.idvSessionId);
+
+    // Update state based on result
+    const mappedStatus = result.status === 'Approved' ? 'verified'
+                       : result.status === 'Declined' ? 'failed'
+                       : 'pending';
+
+    userStateManager.update(userId, {
+      idvStatus: mappedStatus,
+      idvResult: result.decision?.document ? {
+        fullName: [result.decision.document.first_name, result.decision.document.last_name]
+          .filter(Boolean)
+          .join(' '),
+        dateOfBirth: result.decision.document.date_of_birth,
+        documentType: result.decision.document.document_type,
+        documentCountry: result.decision.document.country,
+      } : undefined,
+    });
+
+    console.log(`[IDV] User ${userId} status updated to ${mappedStatus}`);
+
+    res.json({
+      idvStatus: mappedStatus,
+      diditStatus: result.status,
+      message: mappedStatus === 'verified' ? 'Verification complete' : 'Verification still pending',
+    });
+  } catch (err) {
+    console.error('[IDV] Error refreshing status:', err);
+    res.status(500).json({ error: 'Failed to refresh IDV status' });
   }
 });
 

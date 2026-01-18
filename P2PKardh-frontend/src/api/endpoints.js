@@ -215,3 +215,76 @@ export const adminReleaseCampaignApi = async (campaignId, payload = {}) => {
   );
   return data;
 };
+
+/** =========================
+ * VALIDATION SERVICE APIs (Direct calls to validation microservice)
+ * ========================= */
+
+const VALIDATION_BASE = import.meta.env.VITE_VALIDATION_URL || "http://localhost:3001";
+
+// Get user verification status (IDV, bank link, sanctions)
+export async function getVerificationStatusApi(userId) {
+  const res = await fetch(`${VALIDATION_BASE}/api/v1/users/${userId}/status`);
+  if (!res.ok) throw new Error("Failed to get verification status");
+  return res.json();
+}
+
+// Start bank linking flow - returns auth URL to redirect user
+export async function startBankLinkApi(userId) {
+  const res = await fetch(`${VALIDATION_BASE}/api/v1/bank/auth-url`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId }),
+  });
+  if (!res.ok) throw new Error("Failed to start bank linking");
+  return res.json(); // { authUrl }
+}
+
+// Start IDV flow - returns verification URL to redirect user
+export async function startIdvSessionApi(userId, callbackUrl) {
+  const res = await fetch(`${VALIDATION_BASE}/api/v1/idv/session`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, callbackUrl }),
+  });
+  if (!res.ok) throw new Error("Failed to start IDV session");
+  return res.json(); // { sessionId, verificationUrl }
+}
+
+// Refresh IDV status (poll Didit for result)
+export async function refreshIdvStatusApi(userId) {
+  const res = await fetch(`${VALIDATION_BASE}/api/v1/idv/refresh/${userId}`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error("Failed to refresh IDV status");
+  return res.json(); // { idvStatus, message }
+}
+
+// Run full validation (after IDV + bank link complete)
+export async function runValidationApi({ userId, amount, termMonths, purposeCategory, documents = [] }) {
+  const res = await fetch(`${VALIDATION_BASE}/api/v1/validate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      advanceId: `draft-${Date.now()}`,
+      userId,
+      amount, // in pence/cents
+      currency: "GBP",
+      termMonths,
+      purposeCategory,
+      payoutMethod: "bank_transfer",
+      user: {
+        emailVerified: true,
+        hasActiveAdvance: false,
+        accountAgeDays: 30,
+      },
+      evidence: {
+        documents, // Pass document info
+        bankLinkStatus: "connected",
+        idvStatus: "verified",
+      },
+    }),
+  });
+  if (!res.ok) throw new Error("Validation failed");
+  return res.json();
+}
