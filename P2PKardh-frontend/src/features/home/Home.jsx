@@ -120,7 +120,7 @@ export default function Home() {
         setCompleted(completedCampaigns);
       } catch (e) {
         if (!alive) return;
-        setError("Sorry â€” we couldnâ€™t load campaigns right now.");
+        setError("Sorry - we couldn't load campaigns right now.");
         setRunning([]);
         setCompleted([]);
       } finally {
@@ -150,7 +150,9 @@ export default function Home() {
         >
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 items-stretch">
             {loading ? (
-              <div className="text-slate-600">Loadingâ€¦</div>
+              <div className="text-slate-600">Loading...</div>
+            ) : running.length === 0 ? (
+              <div className="text-slate-500">No active campaigns at the moment. Check back soon.</div>
             ) : (
               running.map((c) => (
                 <CampaignCard
@@ -170,7 +172,9 @@ export default function Home() {
         >
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 items-stretch">
             {loading ? (
-              <div className="text-slate-600">Loadingâ€¦</div>
+              <div className="text-slate-600">Loading...</div>
+            ) : completed.length === 0 ? (
+              <div className="text-slate-500">No completed campaigns yet.</div>
             ) : (
               completed.map((c) => (
                 <CampaignCard
