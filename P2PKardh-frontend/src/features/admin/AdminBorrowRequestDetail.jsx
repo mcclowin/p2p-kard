@@ -134,7 +134,7 @@ export default function AdminBorrowRequestDetail() {
                 <div className="rounded-2xl bg-slate-50 p-4">
                   <div className="text-xs text-slate-500">Requested amount</div>
                   <div className="mt-1 text-lg font-semibold">
-                    €{Math.round((row.amount_requested_cents ?? 0) / 100)}
+                    £{Math.round((row.amount_requested_cents ?? 0) / 100)}
                   </div>
                   <div className="mt-2 text-xs text-slate-500">Expected return</div>
                   <div className="mt-1 font-semibold">{row.expected_return_days} days</div>

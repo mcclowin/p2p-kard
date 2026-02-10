@@ -1,15 +1,19 @@
 @import "tailwindcss";
 
-/* App theme tokens */
+/* HandUp theme tokens — warm emerald + earth tones */
 :root{
-  --bg: 248 250 252;          /* slate-50 */
+  --bg: 250 247 242;          /* warm off-white */
   --surface: 255 255 255;     /* white */
   --text: 15 23 42;           /* slate-900 */
   --muted: 71 85 105;         /* slate-600 */
 
-  --brand: 16 185 129;        /* emerald-500 */
-  --brand-2: 59 130 246;      /* blue-500 */
-  --ring: 16 185 129;         /* emerald-500 */
+  --brand: 5 150 105;         /* emerald-600 */
+  --brand-light: 209 250 229; /* emerald-100 */
+  --brand-2: 180 130 65;      /* warm gold accent */
+  --ring: 5 150 105;          /* emerald-600 */
+
+  --earth: 120 100 80;        /* warm brown */
+  --sand: 245 235 220;        /* warm sand bg */
 
   --border: 226 232 240;      /* slate-200 */
   --shadow: 2 6 23;           /* slate-950 */
@@ -18,5 +22,9 @@
 /* Scale up slightly */
 html { font-size: 18px; }
 html, body { height: 100%; }
-body { margin: 0; overflow-x: hidden; }
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background: rgb(var(--bg));
+}
 * { min-width: 0; }

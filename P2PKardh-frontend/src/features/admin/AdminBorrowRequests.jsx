@@ -83,7 +83,7 @@ export default function AdminBorrowRequests() {
                     </div>
                   </div>
                   <div className="mt-1 text-sm text-slate-600">
-                    €{Math.round((r.amount_requested_cents ?? 0) / 100)} • {r.category} • {r.expected_return_days} days
+                    £{Math.round((r.amount_requested_cents ?? 0) / 100)} • {r.category} • {r.expected_return_days} days
                   </div>
                   <div className="mt-1 text-xs text-slate-500">{r.requester_email}</div>
                 </button>

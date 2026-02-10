@@ -33,7 +33,7 @@ export const useAuthStore = create(
         }),
     }),
     {
-      name: "p2p-auth",
+      name: "handup-auth",
       partialize: (s) => ({
         user: s.user,
         token: s.token,

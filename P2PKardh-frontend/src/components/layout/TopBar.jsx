@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 import Button from "../ui/Button.jsx";
+import Logo from "../ui/Logo.jsx";
 import { useAuthStore } from "../../state/authStore.js";
 import { logoutApi } from "../../api/endpoints.js";
 
@@ -183,11 +184,12 @@ export default function TopBar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
         {/* Brand */}
         <div
-          className="cursor-pointer select-none text-lg font-semibold"
+          className="cursor-pointer select-none flex items-center gap-2"
           onClick={() => go("/app/home")}
           title="Go to Home"
         >
-          P2P Kardh
+          <Logo size={30} />
+          <span className="text-lg font-bold tracking-tight text-emerald-700">HandUp</span>
         </div>
 
         {/* Desktop nav */}

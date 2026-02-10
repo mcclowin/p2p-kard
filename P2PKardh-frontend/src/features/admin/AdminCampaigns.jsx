@@ -91,7 +91,7 @@ export default function AdminCampaigns() {
                     </div>
 
                     <div className="mt-1 text-sm text-slate-600">
-                      €{pooled} pooled • €{need} needed • {c.expected_return_days} days
+                      £{pooled} pooled • £{need} needed • {c.expected_return_days} days
                     </div>
 
                     {c.status === "FUNDED" && (

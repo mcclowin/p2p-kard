@@ -71,21 +71,21 @@ export default function LenderDashboard() {
               <div className="rounded-3xl border bg-white/80 p-6">
                 <div className="text-sm text-slate-600">Total supported</div>
                 <div className="mt-2 text-3xl font-semibold">
-                  {supportSummary.total_supported_cents != null ? `€${(supportSummary.total_supported_cents / 100).toFixed(0)}` : "—"}
+                  {supportSummary.total_supported_cents != null ? `£${(supportSummary.total_supported_cents / 100).toFixed(0)}` : "—"}
                 </div>
               </div>
 
               <div className="rounded-3xl border bg-white/80 p-6">
                 <div className="text-sm text-slate-600">Active (running)</div>
                 <div className="mt-2 text-3xl font-semibold">
-                  {supportSummary.active_supported_cents != null ? `€${(supportSummary.active_supported_cents / 100).toFixed(0)}` : "—"}
+                  {supportSummary.active_supported_cents != null ? `£${(supportSummary.active_supported_cents / 100).toFixed(0)}` : "—"}
                 </div>
               </div>
 
               <div className="rounded-3xl border bg-white/80 p-6">
                 <div className="text-sm text-slate-600">Returned</div>
                 <div className="mt-2 text-3xl font-semibold">
-                  {supportSummary.returned_cents != null ? `€${(supportSummary.returned_cents / 100).toFixed(0)}` : "—"}
+                  {supportSummary.returned_cents != null ? `£${(supportSummary.returned_cents / 100).toFixed(0)}` : "—"}
                 </div>
               </div>
             </div>
@@ -96,7 +96,7 @@ export default function LenderDashboard() {
                   <div key={`${x.campaign_id}-${x.amount_cents}`} className="rounded-3xl border p-5 flex items-start justify-between gap-4">
                     <div className="min-w-0">
                       <div className="text-lg font-semibold break-words">{x.campaign_title}</div>
-                      <div className="mt-1 text-sm text-slate-600">Contribution: €{(x.amount_cents / 100).toFixed(0)}</div>
+                      <div className="mt-1 text-sm text-slate-600">Contribution: £{(x.amount_cents / 100).toFixed(0)}</div>
                       <div className="mt-1 text-sm text-slate-600">Expected: {x.expected_return_date ?? "—"}</div>
                     </div>
 
@@ -116,7 +116,7 @@ export default function LenderDashboard() {
                     <div className="min-w-0">
                       <div className="text-lg font-semibold break-words">{r.title}</div>
                       <div className="mt-1 text-sm text-slate-600">
-                        Amount: €{(r.amount_requested_cents / 100).toFixed(0)} • Expected: ~{r.expected_return_days} days
+                        Amount: £{(r.amount_requested_cents / 100).toFixed(0)} • Expected: ~{r.expected_return_days} days
                       </div>
                     </div>
                     <Pill tone={r.status === "VERIFIED" ? "good" : "neutral"}>{r.status}</Pill>

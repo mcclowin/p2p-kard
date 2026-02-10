@@ -125,13 +125,13 @@ export default function Repayments() {
                   <div className="rounded-2xl bg-slate-50 p-4">
                     <div className="text-xs text-slate-500">Paid</div>
                     <div className="mt-1 text-lg font-semibold">
-                      {totals.paid_cents != null ? `€${(totals.paid_cents / 100).toFixed(0)}` : "—"}
+                      {totals.paid_cents != null ? `£${(totals.paid_cents / 100).toFixed(0)}` : "—"}
                     </div>
                   </div>
                   <div className="rounded-2xl bg-slate-50 p-4">
                     <div className="text-xs text-slate-500">Remaining</div>
                     <div className="mt-1 text-lg font-semibold">
-                      {totals.remaining_cents != null ? `€${(totals.remaining_cents / 100).toFixed(0)}` : "—"}
+                      {totals.remaining_cents != null ? `£${(totals.remaining_cents / 100).toFixed(0)}` : "—"}
                     </div>
                   </div>
                   <div className="rounded-2xl bg-slate-50 p-4">
@@ -177,7 +177,7 @@ export default function Repayments() {
                           Due: {s.due_date || s.dueDate || "—"}
                         </div>
                         <div className="mt-1 text-sm text-slate-600">
-                          Amount: €{(((s.amount_cents ?? s.amountCents) || 0) / 100).toFixed(0)}
+                          Amount: £{(((s.amount_cents ?? s.amountCents) || 0) / 100).toFixed(0)}
                         </div>
                       </div>
                       <Pill tone={toneForStatus(s.status)}>{s.status}</Pill>

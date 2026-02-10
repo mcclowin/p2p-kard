@@ -13,6 +13,7 @@ import SupportCampaign from "../features/campaigns/SupportCampaign.jsx";
 import LenderDashboard from "../features/lender/LenderDashboard.jsx";
 import BorrowerApply from "../features/borrower/BorrowerApply.jsx";
 import Repayments from "../features/repayments/Repayments.jsx";
+import QardHasanContract from "../features/contracts/QardHasanContract.jsx";
 
 // Admin screens
 import AdminBorrowRequests from "../features/admin/AdminBorrowRequests.jsx";
@@ -74,6 +75,14 @@ export function AppRoutes() {
           element={
             <RequireAuth>
               <Repayments />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="contracts/:id"
+          element={
+            <RequireAuth>
+              <QardHasanContract />
             </RequireAuth>
           }
         />
