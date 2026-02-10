@@ -619,6 +619,104 @@ services:
 
 ---
 
+## 7. Qard Hasan Contract — Technical Spec
+
+> Product details (what, why, UX) → see `PRODUCT_DOC.md` Section 8B
+
+### Data Model
+
+#### `qard_hasan_contracts`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID | Primary key |
+| campaign_id | UUID | OneToOne → campaigns (one contract per campaign) |
+| borrow_request_id | UUID | FK → borrow_requests |
+| borrower_id | UUID | FK → users |
+| contract_text | TEXT | Full rendered agreement |
+| contract_hash | VARCHAR(64) | SHA-256 hash for tamper detection |
+| amount_cents | BIGINT | Loan principal in cents |
+| currency | VARCHAR(3) | e.g. EUR |
+| repayment_date | DATE | Expected repayment deadline |
+| status | VARCHAR(20) | GENERATED / BORROWER_SIGNED / ACTIVE / COMPLETED / FORGIVEN |
+| borrower_signed_at | TIMESTAMP | When borrower signed |
+| created_at | TIMESTAMP | |
+| updated_at | TIMESTAMP | |
+
+#### `contract_consents`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID | Primary key |
+| contract_id | UUID | FK → qard_hasan_contracts |
+| user_id | UUID | FK → users |
+| role | VARCHAR(20) | BORROWER or SUPPORTER |
+| consented_at | TIMESTAMP | |
+| ip_address | INET | For audit trail |
+| user_agent | TEXT | For audit trail |
+
+Unique constraint: (contract_id, user_id, role)
+
+### API Endpoints
+
+```
+# Contract viewing (auth required, borrower/contributor/admin)
+GET    /api/v1/contracts/:campaignId        → Full contract with consents
+
+# Borrower signing (borrower only)
+POST   /api/v1/contracts/:campaignId/sign   → Sign contract (GENERATED → BORROWER_SIGNED)
+
+# Admin
+GET    /api/v1/admin/contracts              → List all contracts
+GET    /api/v1/admin/contracts/:campaignId  → Full contract detail
+```
+
+### Access Control
+
+The contract endpoint (`GET /api/v1/contracts/:campaignId`) enforces:
+- **Borrower** — can view (it's their contract)
+- **Lender** (paid contributor) — can view (they're party to it)
+- **Admin** — can view
+- **Everyone else** — 403 Forbidden
+
+---
+
+## 8. Geolocation — Technical Spec
+
+> Product details (what, why, UX) → see `PRODUCT_DOC.md` Section 6
+
+### Data Model Changes
+
+#### On `borrow_requests` / `campaigns`
+| Column | Type | Notes |
+|--------|------|-------|
+| city | VARCHAR(100) | e.g. "Birmingham", "Amsterdam" |
+| country_code | VARCHAR(2) | ISO 3166-1 alpha-2, e.g. "GB", "NL" |
+| latitude | DECIMAL(9,6) | City-centre approx, for distance calc (not borrower's address) |
+| longitude | DECIMAL(9,6) | City-centre approx |
+
+#### On `users` (optional, for lender preferences)
+| Column | Type | Notes |
+|--------|------|-------|
+| default_city | VARCHAR(100) | Saved from last browse session |
+| default_country_code | VARCHAR(2) | |
+
+### API Changes
+
+```
+# Home / browse (public)
+GET /api/v1/home?lat=52.48&lon=-1.89         → campaigns sorted by proximity
+GET /api/v1/home?city=Birmingham&country=GB   → campaigns filtered by city
+
+# Borrow request (new fields)
+POST /api/v1/borrow-requests
+  { ..., city: "Birmingham", country_code: "GB" }
+
+# Campaign detail (includes location)
+GET /api/v1/campaigns/:id
+  → { ..., city: "Birmingham", countryCode: "GB" }
+```
+
+---
+
 ## Questions / TBD
 
 - [ ] Which Open Banking provider? (Plaid vs TrueLayer)

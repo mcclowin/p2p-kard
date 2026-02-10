@@ -446,6 +446,88 @@ GET https://api.postcodes.io/postcodes/E81DY
 
 ---
 
+## 8B. Qard Hasan Contract (Loan Agreement)
+
+### What Is It?
+
+Every funded loan has a formal written agreement — the Qard Hasan contract. It's an interest-free goodwill loan agreement between one lender and one borrower, with ReCircle as the independent witness.
+
+The contract is auto-generated when a campaign reaches its funding goal. The borrower must sign it before funds are released.
+
+### Why It Matters
+
+- **Legal clarity** — both parties know the exact terms
+- **Ethical compliance** — the zero-interest commitment is explicit and binding
+- **Trust** — a real agreement, not just a handshake
+- **Accountability** — borrower formally commits to repay
+- **Tamper detection** — SHA-256 hash ensures the contract hasn't been altered
+
+### Contract Lifecycle
+
+```
+Campaign reaches funding goal
+       │
+       ▼
+Contract auto-generated (status: GENERATED)
+  - Lender already accepted terms at checkout
+       │
+       ▼
+Borrower reviews contract on dedicated page
+       │
+       ▼
+Borrower signs (status: BORROWER_SIGNED)
+       │
+       ▼
+Admin releases funds (status: ACTIVE)
+       │
+       ├── Loan fully repaid → status: COMPLETED
+       └── Debt forgiven    → status: FORGIVEN
+```
+
+### What the Contract Contains
+
+1-to-1 agreement (one lender, one borrower) covering:
+
+1. **Parties** — borrower and lender named (both verified by platform), ReCircle as witness
+2. **Nature** — defines Qard Hasan as an interest-free goodwill loan, rooted in Islamic finance, open to all regardless of faith
+3. **Loan amount** — exact principal in EUR/GBP
+4. **Zero-interest clause** — prohibits interest, late fees, hidden charges, conditional benefits
+5. **Repayment terms** — principal-only repayment by specified date, partial payments encouraged
+6. **Hardship & compassion** — extensions encouraged, forgiveness possible, no penalties for hardship
+7. **Dispute resolution** — good-faith discussion, mediation, then local law
+8. **Platform role** — ReCircle as facilitator/witness, not a loan party
+9. **Witness** — ReCircle as independent witness
+10. **Acceptance** — borrower signs explicitly, lender accepted at contribution time
+
+### Two-Party Consent Flow
+
+**Lender** — accepts ethical lending terms via checkbox before Stripe checkout:
+> "I understand this is a Qard Hasan — an interest-free, goodwill loan. No interest, fees, or additional charges will apply. Repayment of the principal amount only will be handled through the ReCircle platform. In case of borrower hardship, I am encouraged (but not obligated) to grant extensions or consider forgiveness."
+
+**Borrower** — reviews full contract on a dedicated page, checks consent box, clicks "Sign agreement":
+> "I have read and understood the Qard Hasan (interest-free goodwill loan) agreement above. I accept the terms and commit to repay the principal amount in good faith."
+
+### Where It Appears in the App
+
+| Page | What shows |
+|------|-----------|
+| Support checkout (`/app/campaigns/:id/support`) | Terms checkbox (must accept before paying) |
+| Contract page (`/app/contracts/:campaignId`) | Full contract text, signing flow (borrower), print button, hash |
+| Lender dashboard (`/app/lender`) | "View Qard Hasan agreement" link for funded campaigns |
+| Admin campaigns (`/app/admin/campaigns`) | "View contract" link, note about checking contract before releasing funds |
+
+### V1 Limitations
+
+- No PDF generation — displayed as formatted text, printable via browser print
+- No e-signature provider — consent recorded with timestamp, IP, and user agent
+- One contract per campaign (1 lender, 1 borrower)
+
+### Sample Contract
+
+See `INTEGRATION_SPEC.md` Section 7 for a full sample contract.
+
+---
+
 ## 9. Fees & Pricing
 
 - Platform fee: Tiered flat fees. (eg. 0-500=$5, 500-2000=10, 2000-10,000=100)
@@ -477,10 +559,32 @@ GET https://api.postcodes.io/postcodes/E81DY
 
 ## 11. Privacy & Anonymity
 
-- Borrower name: Hidden (show initials or pseudonym)
-- Borrower location: Area/neighbourhood only
-- Borrower story: Visible
+Privacy has two stages — **discovery** (browsing) and **contract** (after funding).
+
+### Discovery Stage (Browsing Campaigns)
+- Borrower name: **Hidden** — never shown while browsing
+- Borrower location: Area/city only (e.g. "Hackney, London")
+- Borrower story: Visible (curated by admin)
 - Supporter names: Hidden from borrower (optional reveal)
+- Documents, email, address: **Never exposed** to lenders
+
+### Contract Stage (After Funding)
+- Borrower real name: **Disclosed** on the formal loan agreement
+- Lender real name: **Disclosed** on the formal loan agreement
+- Only the specific lender and borrower (+ admin) can access the contract
+- No other platform users can see either party's identity
+
+### What Is Never Exposed to Lenders
+- Borrower's email address
+- Borrower's street address or precise location
+- Supporting documents (payslips, bank statements)
+- Admin notes or internal review details
+- Borrower's other borrow requests
+
+### Data Minimisation
+- Borrower location: city/area only, no street address collected
+- Lender location: used for proximity sorting, stored only if user opts in
+- Contract audit trail: IP address and user agent stored for legal compliance, not displayed in UI
 
 ---
 
@@ -600,17 +704,17 @@ Campaign goes live (RUNNING)
 
 **Still Open:**
 - [ ] SSO provider: Clerk vs Supabase vs other?
-- [ ] Multiple or single funder per campaign?
-- [ ] Platform fee model: tiered fixed? 
+- [x] Multiple or single funder per campaign? → **Single lender per campaign (1-to-1) for V1**
+- [ ] Platform fee model: tiered fixed?
 - [ ] Default handling: Grace period? Platform guarantee?
 - [ ] Partial funding: Allow borrower to accept less than requested?
 - [ ] Loan forgiveness: How does supporter convert to Sadaqah?
 - [ ] Do we allow option for borrower to be contacted by supporter?
+- [x] Terms & Conditions for both users → **Qard Hasan contract auto-generated at funding, borrower signs explicitly, lender accepts at checkout (see Section 8B)**
 
 To figure out:
 
-- [ ] Terms & Conditions for both users   
-- [ ] Legal & Compliance │ Is this FCA-regulated? Consumer credit rules? GDPR requirements? Dispute resolution process?    
+- [ ] Legal & Compliance │ Is this FCA-regulated? Consumer credit rules? GDPR requirements? Dispute resolution process?
    
 ---
 
@@ -632,4 +736,5 @@ To figure out:
 | Date | Author | Changes |
 |------|--------|---------|
 | 2026-02-01 | | Init |
+| 2026-02-10 | | Added Section 8B (Qard Hasan contract), updated Section 11 (privacy by stage), marked 1-to-1 lending and T&Cs as decided |
 
