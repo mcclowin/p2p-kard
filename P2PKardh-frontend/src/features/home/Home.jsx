@@ -328,11 +328,11 @@ export default function Home() {
                   size="lg"
                   onClick={() => navigate(isAuthed ? "/app/borrower/apply" : "/register")}
                 >
-                  I Need Help
+                  Request a Loan
                 </Button>
                 <Button
                   variant="outline"
-                  className="!border-emerald-300/40 !text-white hover:!bg-white/10"
+                  className="!border-white !text-white hover:!bg-white hover:!text-emerald-800 font-bold"
                   size="lg"
                   onClick={() => {
                     const el = document.getElementById("active-campaigns");
@@ -340,7 +340,7 @@ export default function Home() {
                     else navigate("/app/home");
                   }}
                 >
-                  Help Someone
+                  Lend a Hand
                 </Button>
               </div>
             </div>

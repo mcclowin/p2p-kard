@@ -32,7 +32,7 @@ class Campaign(models.Model):
     amount_pooled_cents = models.PositiveBigIntegerField(default=0, validators=[MinValueValidator(0)])
     expected_return_days = models.PositiveIntegerField(validators=[MinValueValidator(0)])
     expected_return_date = models.DateField(null=True, blank=True)
-    currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.EUR)
+    currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.GBP)
     status = models.CharField(
         max_length=20, choices=CampaignStatus.choices, default=CampaignStatus.DRAFT
     )

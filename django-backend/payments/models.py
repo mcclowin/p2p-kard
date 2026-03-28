@@ -32,7 +32,7 @@ class Contribution(models.Model):
     )
     campaign = models.ForeignKey(Campaign, related_name="contributions", on_delete=models.CASCADE)
     amount_cents = models.PositiveBigIntegerField(validators=[MinValueValidator(0)])
-    currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.EUR)
+    currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.GBP)
     status = models.CharField(
         max_length=20, choices=ContributionStatus.choices, default=ContributionStatus.PLEDGED
     )
@@ -50,7 +50,7 @@ class PlatformLedger(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     type = models.CharField(max_length=20, choices=PlatformLedgerType.choices)
     amount_cents = models.PositiveBigIntegerField(validators=[MinValueValidator(0)])
-    currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.EUR)
+    currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.GBP)
     related_campaign = models.ForeignKey(
         Campaign, null=True, blank=True, on_delete=models.SET_NULL, related_name="ledger_entries"
     )

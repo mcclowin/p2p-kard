@@ -164,7 +164,7 @@ export default function TopBar() {
                 className="hidden sm:inline-flex"
                 onClick={() => go("/app/borrower/apply")}
               >
-                I Need Help
+                Request a Loan
               </Button>
 
               {/* Profile dropdown */}
@@ -273,7 +273,7 @@ export default function TopBar() {
                   </button>
 
                   <div className="grid grid-cols-2 gap-2 pt-2">
-                    <Button className="w-full" onClick={() => go("/app/borrower/apply")}>I Need Help</Button>
+                    <Button className="w-full" onClick={() => go("/app/borrower/apply")}>Request a Loan</Button>
                     <Button variant="outline" className="w-full" onClick={handleLogout} disabled={loggingOut}>
                       {loggingOut ? "..." : "Sign out"}
                     </Button>

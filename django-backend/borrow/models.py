@@ -6,7 +6,9 @@ from django.db import models
 
 
 class Currency(models.TextChoices):
+    GBP = "GBP", "GBP"
     EUR = "EUR", "EUR"
+    USD = "USD", "USD"
 
 
 class BorrowRequestStatus(models.TextChoices):
@@ -36,7 +38,7 @@ class BorrowRequest(models.Model):
     category = models.CharField(max_length=100)
     reason_detailed = models.TextField()
     amount_requested_cents = models.PositiveBigIntegerField(validators=[MinValueValidator(0)])
-    currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.EUR)
+    currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.GBP)
     expected_return_days = models.PositiveIntegerField(validators=[MinValueValidator(0)])
     status = models.CharField(
         max_length=30, choices=BorrowRequestStatus.choices, default=BorrowRequestStatus.SUBMITTED
