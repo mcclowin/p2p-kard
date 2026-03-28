@@ -332,7 +332,7 @@ export default function Home() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="!border-white !text-white hover:!bg-white hover:!text-emerald-800 font-bold"
+                  className="!bg-white !text-emerald-800 !border-white hover:!bg-emerald-50 font-bold"
                   size="lg"
                   onClick={() => {
                     const el = document.getElementById("active-campaigns");
