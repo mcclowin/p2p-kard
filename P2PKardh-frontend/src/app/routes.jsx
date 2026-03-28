@@ -9,6 +9,7 @@ import Register from "../features/auth/Register.jsx";
 // Main app screens
 import Home from "../features/home/Home.jsx";
 import TheBeautifulLoan from "../features/beautiful-loan/TheBeautifulLoan.jsx";
+import DocsPage from "../features/docs/DocsPage.jsx";
 import CampaignDetails from "../features/campaigns/CampaignDetails.jsx";
 import SupportCampaign from "../features/campaigns/SupportCampaign.jsx";
 import LenderDashboard from "../features/lender/LenderDashboard.jsx";
@@ -54,6 +55,7 @@ export function AppRoutes() {
         {/* Public pages */}
         <Route path="home" element={<Home />} />
         <Route path="the-beautiful-loan" element={<TheBeautifulLoan />} />
+        <Route path="docs" element={<DocsPage />} />
         <Route path="campaigns/:id" element={<CampaignDetails />} />
 
         {/* Auth required */}

@@ -108,6 +108,8 @@ export default function TopBar() {
     ? "borrower"
     : path.startsWith("/app/the-beautiful-loan")
     ? "beautiful-loan"
+    : path.startsWith("/app/docs")
+    ? "docs"
     : "home";
 
   function go(to) {
@@ -147,6 +149,7 @@ export default function TopBar() {
         <nav className="hidden md:flex items-center gap-1">
           <NavLink active={activeKey === "home"} onClick={() => go("/app/home")}>Home</NavLink>
           <NavLink active={activeKey === "beautiful-loan"} onClick={() => go("/app/the-beautiful-loan")}>The Beautiful Loan</NavLink>
+          <NavLink active={activeKey === "docs"} onClick={() => go("/app/docs")}>Docs</NavLink>
           {isAuthed && (
             <NavLink active={activeKey === "dashboard"} onClick={() => go("/app/lender")}>My Dashboard</NavLink>
           )}
@@ -247,6 +250,7 @@ export default function TopBar() {
               {[
                 { key: "home", label: "Home", to: "/app/home" },
                 { key: "beautiful-loan", label: "The Beautiful Loan", to: "/app/the-beautiful-loan" },
+                { key: "docs", label: "Docs", to: "/app/docs" },
               ].map((item) => (
                 <button
                   key={item.key}

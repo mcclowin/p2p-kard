@@ -225,7 +225,7 @@ export default function BorrowerApply() {
         } catch (uploadErr) { console.log("Upload skipped:", uploadErr); }
       }
 
-      setStep(7);
+      setStep(8);
       if (validation.decision === "PASS") setInfo("Your request has been approved! We will process it shortly.");
       else if (validation.decision === "COUNTER_OFFER" && validation.counterOffer) {
         setInfo(`Under review. We recommend £${(validation.counterOffer.suggestedAmount / 100).toFixed(0)} over ${validation.counterOffer.suggestedTermMonths} months.`);
@@ -250,9 +250,9 @@ export default function BorrowerApply() {
     return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${colors[status] || colors.none}`}>{label}</span>;
   }
 
-  const totalSteps = 6;
+  const totalSteps = 7;
 
-  const stepLabels = ["Basics", "Your Story", "Amount & Terms", "Documents", "Verification", "Review & Submit"];
+  const stepLabels = ["Basics", "Your Story", "Amount & Terms", "Documents", "Verification", "Review Details", "Review Contract"];
 
   return (
     <Page>
@@ -549,8 +549,92 @@ export default function BorrowerApply() {
                 {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
                 <div className="flex justify-between pt-2">
                   <Button variant="outline" onClick={goBack}>Back</Button>
-                  <Button onClick={onSubmit} disabled={loading || !confirmAccurate || !confirmTerms || !confirmReview}>
-                    {loading ? "Submitting..." : "Submit for Review"}
+                  <Button onClick={goNext} disabled={!confirmAccurate || !confirmTerms || !confirmReview}>
+                    Review Contract →
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </FadeIn>
+        )}
+
+        {/* Page 7: Contract Review */}
+        {step === 7 && (
+          <FadeIn>
+            <Card title="Review your Qard Hasan contract" subtitle="This is a preview of the loan agreement that will be generated when your request is funded.">
+              <div className="space-y-6">
+
+                <div className="bg-emerald-50/60 border border-emerald-200/40 rounded-xl p-5 text-center">
+                  <p className="font-heading italic text-emerald-900 text-lg" dir="rtl">
+                    يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوٓا۟ إِذَا تَدَايَنتُم بِدَيْنٍ إِلَىٰٓ أَجَلٍۢ مُّسَمًّى فَٱكْتُبُوهُ
+                  </p>
+                  <p className="text-emerald-800 mt-2 text-sm font-medium">
+                    "O you who believe, when you contract a debt for a specified term, write it down."
+                    <span className="text-emerald-600"> — Quran 2:282</span>
+                  </p>
+                </div>
+
+                <div className="bg-white border border-[var(--color-border)] rounded-xl p-6 space-y-5 text-sm text-[var(--color-text-muted)]">
+                  <h3 className="text-lg font-bold text-[var(--color-text)] font-heading">
+                    Qard Hasan Agreement — Preview
+                  </h3>
+
+                  <div>
+                    <h4 className="font-semibold text-[var(--color-text)] mb-1">1. Parties</h4>
+                    <p><strong>Borrower:</strong> [Your name — revealed upon funding]</p>
+                    <p><strong>Lender:</strong> [To be determined when funded]</p>
+                    <p><strong>Witness:</strong> HandUp Platform</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-[var(--color-text)] mb-1">2. Nature of the Loan</h4>
+                    <p>This is a <strong>Qard Hasan</strong> — an interest-free goodwill loan. It is rooted in the Islamic tradition of benevolent lending but is open to all, regardless of faith. The lender extends this loan seeking no financial return beyond the repayment of the principal.</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-[var(--color-text)] mb-1">3. Loan Details</h4>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <div className="p-3 bg-[var(--color-surface-warm)] rounded-lg">
+                        <div className="text-xs uppercase tracking-wider text-[var(--color-text-subtle)]">Amount</div>
+                        <div className="font-bold text-[var(--color-text)] text-lg">£{amountGbp}</div>
+                      </div>
+                      <div className="p-3 bg-[var(--color-surface-warm)] rounded-lg">
+                        <div className="text-xs uppercase tracking-wider text-[var(--color-text-subtle)]">Repay within</div>
+                        <div className="font-bold text-[var(--color-text)] text-lg">{repayDays} days</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-[var(--color-text)] mb-1">4. Zero-Interest Clause</h4>
+                    <p>No interest, late fees, hidden charges, or conditional benefits shall apply to this loan. The borrower is obligated to repay <strong>only the exact principal amount</strong>.</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-[var(--color-text)] mb-1">5. Repayment</h4>
+                    <p>The borrower commits to repay the full principal as a single payment by the agreed date. Partial payments are encouraged if full repayment is not immediately possible.</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-[var(--color-text)] mb-1">6. Hardship & Compassion</h4>
+                    <p>If the borrower faces genuine hardship, the lender is encouraged — but not obligated — to grant an extension or forgive part or all of the debt. As stated in Quran 2:280: <em>"If the debtor is in hardship, then let there be postponement until a time of ease. But if you give it as charity, it is better for you, if only you knew."</em></p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-[var(--color-text)] mb-1">7. Platform Role</h4>
+                    <p>HandUp acts as facilitator and independent witness. HandUp is not a party to the loan itself and does not guarantee repayment.</p>
+                  </div>
+                </div>
+
+                <div className="bg-amber-50 border border-amber-200/60 rounded-xl p-4 text-sm text-amber-800">
+                  <strong>Note:</strong> This is a preview. The final contract will be generated with full details (including the lender's name) once your request is funded. You will be asked to formally sign it before funds are released.
+                </div>
+
+                {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+                <div className="flex justify-between pt-2">
+                  <Button variant="outline" onClick={goBack}>Back</Button>
+                  <Button onClick={onSubmit} disabled={loading}>
+                    {loading ? "Submitting..." : "I Understand — Submit for Review"}
                   </Button>
                 </div>
               </div>
@@ -559,7 +643,7 @@ export default function BorrowerApply() {
         )}
 
         {/* Page 7: Success */}
-        {step === 7 && (
+        {step === 8 && (
           <FadeIn>
             <div className="text-center space-y-6 py-8">
               <div className={`inline-flex w-20 h-20 rounded-full items-center justify-center text-4xl ${
