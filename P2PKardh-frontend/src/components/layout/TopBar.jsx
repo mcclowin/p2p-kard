@@ -134,11 +134,14 @@ export default function TopBar() {
     ? "dashboard"
     : path.startsWith("/app/borrower")
     ? "borrower"
+    : path.startsWith("/app/the-beautiful-loan")
+    ? "beautiful-loan"
     : "home";
 
   // ✅ Public-first nav. Dashboard + Request support only show if logged in.
   const navItems = [
     { key: "home", label: "Home", to: "/app/home" },
+    { key: "beautiful-loan", label: "The Beautiful Loan", to: "/app/the-beautiful-loan" },
     ...(isAuthed ? [{ key: "dashboard", label: "My Dashboard", to: "/app/lender" }] : []),
     ...(isAuthed && (user?.is_staff || user?.is_superuser)
       ? [{ key: "admin", label: "Admin", to: "/app/admin/requests" }]
@@ -367,6 +370,16 @@ export default function TopBar() {
                 type="button"
               >
                 Home
+              </button>
+
+              <button
+                className={`w-full rounded-xl px-4 py-3 text-left text-base font-semibold ${
+                  activeKey === "beautiful-loan" ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-800"
+                }`}
+                onClick={() => go("/app/the-beautiful-loan")}
+                type="button"
+              >
+                The Beautiful Loan
               </button>
 
               {isAuthed ? (
