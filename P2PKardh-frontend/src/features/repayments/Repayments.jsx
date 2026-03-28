@@ -73,7 +73,7 @@ export default function Repayments() {
       const res = await repaymentsPayApi({
         borrowRequestId,
         amountCents: Math.round(eur * 100),
-        currency: "EUR",
+        currency: "GBP",
       });
 
       const url = res.checkout_url || res.checkoutUrl || res.url;
@@ -149,7 +149,7 @@ export default function Repayments() {
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
                   <Input
-                    label="Amount (EUR)"
+                    label="Amount (£)"
                     inputMode="decimal"
                     value={amountEur}
                     onChange={(e) => setAmountEur(e.target.value)}

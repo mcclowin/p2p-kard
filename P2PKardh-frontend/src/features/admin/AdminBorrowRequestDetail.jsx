@@ -80,7 +80,7 @@ export default function AdminBorrowRequestDetail() {
         category: row.category,
         verified: true,
         status: "RUNNING",
-        currency: row.currency || "EUR",
+        currency: row.currency || "GBP",
         amountNeededCents: row.amount_requested_cents,
         amountPooledCents: 0,
         expectedReturnDays: row.expected_return_days,

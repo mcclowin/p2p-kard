@@ -65,7 +65,7 @@ export async function campaignDetailApi(campaignId) {
 export async function supportCheckoutApi({
   campaignId,
   amountCents,
-  currency = "EUR",
+  currency = "GBP",
   returnUrl,
   cancelUrl,
   termsAccepted = false,
@@ -176,7 +176,7 @@ export async function repaymentsSetupApi({
 export async function repaymentsPayApi({
   borrowRequestId,
   amountCents,
-  currency = "EUR",
+  currency = "GBP",
 }) {
   const { data } = await api.post("/api/v1/repayments/pay", {
     borrow_request_id: borrowRequestId,
