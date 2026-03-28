@@ -68,6 +68,7 @@ export async function supportCheckoutApi({
   currency = "EUR",
   returnUrl,
   cancelUrl,
+  termsAccepted = false,
 }) {
   const { data } = await api.post(
     `/api/v1/campaigns/${campaignId}/support/checkout`,
@@ -76,9 +77,35 @@ export async function supportCheckoutApi({
       currency,
       return_url: returnUrl,
       cancel_url: cancelUrl,
+      terms_accepted: termsAccepted,
     }
   );
   return data; // { checkout: {...} }
+}
+
+/** =========================
+ * CONTRACTS (JWT required)
+ * ========================= */
+export async function contractDetailApi(campaignId) {
+  const { data } = await api.get(`/api/v1/contracts/${campaignId}`);
+  return data; // { contract: {...} }
+}
+
+export async function contractSignApi(campaignId) {
+  const { data } = await api.post(`/api/v1/contracts/${campaignId}/sign`, {
+    consent_confirmed: true,
+  });
+  return data; // { contract: {...} }
+}
+
+export async function adminContractListApi() {
+  const { data } = await api.get("/api/v1/admin/contracts");
+  return data; // { contracts: [...] }
+}
+
+export async function adminContractDetailApi(campaignId) {
+  const { data } = await api.get(`/api/v1/admin/contracts/${campaignId}`);
+  return data; // { contract: {...} }
 }
 
 /** =========================

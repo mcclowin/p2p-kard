@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 import stripe
@@ -154,5 +155,14 @@ class StripeWebhookView(APIView):
             if campaign.amount_pooled_cents >= campaign.amount_needed_cents:
                 campaign.status = CampaignStatus.FUNDED
             campaign.save(update_fields=["amount_pooled_cents", "status"])
+
+        # Generate Qard Hasan contract when campaign reaches FUNDED
+        if campaign.status == CampaignStatus.FUNDED:
+            try:
+                from contracts.services import generate_contract_for_campaign
+                generate_contract_for_campaign(campaign)
+            except Exception:
+                logger = logging.getLogger(__name__)
+                logger.exception("Failed to generate contract for campaign %s", campaign.id)
 
         return Response(status=status.HTTP_200_OK)

@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "payments",
     "repayments",
     "staffapi",
+    "contracts",
     "core",
 ]
 

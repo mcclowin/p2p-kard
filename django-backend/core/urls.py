@@ -10,5 +10,6 @@ urlpatterns = [
     path("", include("borrow.urls")),
     path("", include("staffapi.urls")),
     path("", include("payments.urls")),
+    path("", include("contracts.urls")),
     path("", include("repayments.urls")),
 ]

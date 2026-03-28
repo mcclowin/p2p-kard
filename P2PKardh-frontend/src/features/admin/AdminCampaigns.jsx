@@ -94,11 +94,25 @@ export default function AdminCampaigns() {
                       £{pooled} pooled • £{need} needed • {c.expected_return_days} days
                     </div>
 
+                    {["FUNDED", "DISBURSED", "IN_REPAYMENT", "COMPLETED"].includes(c.status) && (
+                      <div className="mt-2">
+                        <a
+                          href={`/app/contracts/${c.id}`}
+                          className="text-xs text-blue-600 hover:text-blue-800 underline"
+                        >
+                          View contract
+                        </a>
+                      </div>
+                    )}
+
                     {c.status === "FUNDED" && (
                       <div className="mt-3">
                         <Button onClick={() => releaseFunds(c.id)} disabled={workingId === c.id}>
                           {workingId === c.id ? "Releasing…" : "Release funds"}
                         </Button>
+                        <div className="mt-1 text-xs text-slate-500">
+                          Ensure the borrower has signed the Qard Hasan contract before releasing.
+                        </div>
                       </div>
                     )}
                   </div>

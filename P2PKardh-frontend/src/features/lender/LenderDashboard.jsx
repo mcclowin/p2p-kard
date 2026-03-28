@@ -1,5 +1,5 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Card from "../../components/ui/Card.jsx";
 import { Page } from "../../components/ui/Motion.jsx";
 import { dashboardApi } from "../../api/endpoints.js";
@@ -15,6 +15,7 @@ function Pill({ children, tone = "neutral" }) {
 
 export default function LenderDashboard() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
   const [data, setData] = React.useState(null);
@@ -100,9 +101,19 @@ export default function LenderDashboard() {
                       <div className="mt-1 text-sm text-slate-600">Expected: {x.expected_return_date ?? "—"}</div>
                     </div>
 
-                    <Pill tone={x.contribution_status === "RETURNED" ? "good" : "warn"}>
-                      {x.contribution_status}
-                    </Pill>
+                    <div className="flex flex-col items-end gap-2">
+                      <Pill tone={x.contribution_status === "RETURNED" ? "good" : "warn"}>
+                        {x.contribution_status}
+                      </Pill>
+                      {["FUNDED", "DISBURSED", "IN_REPAYMENT", "COMPLETED"].includes(x.campaign_status) && x.campaign_id && (
+                        <button
+                          onClick={() => navigate(`/app/contracts/${x.campaign_id}`)}
+                          className="text-xs text-blue-600 hover:text-blue-800 underline"
+                        >
+                          View Qard Hasan agreement
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
                 {!supportByCampaign.length && <div className="text-slate-600">No contributions yet.</div>}

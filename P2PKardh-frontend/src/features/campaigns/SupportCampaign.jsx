@@ -38,6 +38,7 @@ export default function SupportCampaign() {
         currency: "GBP",
         returnUrl,
         cancelUrl,
+        termsAccepted: acceptTerms,
       });
 
       const checkout = res.checkout || {};

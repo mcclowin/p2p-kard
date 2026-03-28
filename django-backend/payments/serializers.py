@@ -13,10 +13,16 @@ class SupportCheckoutRequestSerializer(CamelCaseSerializerMixin, serializers.Ser
     currency = serializers.ChoiceField(choices=Currency.choices, default=Currency.EUR)
     return_url = serializers.URLField()
     cancel_url = serializers.URLField()
+    terms_accepted = serializers.BooleanField(default=False)
 
     def validate_amount_cents(self, value):
         if value <= 0:
             raise serializers.ValidationError("amountCents must be greater than 0.")
+        return value
+
+    def validate_terms_accepted(self, value):
+        if not value:
+            raise serializers.ValidationError("You must accept the Qard Hasan terms to proceed.")
         return value
 
 
