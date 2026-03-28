@@ -29,14 +29,8 @@ const CATEGORIES = [
 ];
 
 const CATEGORY_MAP = {
-  Medical: "medical",
-  Education: "education",
-  Housing: "rent",
-  Employment: "other",
-  Emergency: "emergency",
-  Essentials: "utilities",
-  Family: "other",
-  Other: "other",
+  Medical: "medical", Education: "education", Housing: "rent", Employment: "other",
+  Emergency: "emergency", Essentials: "utilities", Family: "other", Other: "other",
 };
 
 const AMOUNT_PRESETS = [100, 250, 500, 1000, 2000, 5000];
@@ -53,30 +47,30 @@ export default function BorrowerApply() {
   const { user } = useAuthStore();
   const userId = user?.id || user?.userId || "anon";
 
-  // Page 1: Basics
+  // Page 1
   const [category, setCategory] = React.useState("");
   const [title, setTitle] = React.useState("");
   const [city, setCity] = React.useState("");
   const [postcode, setPostcode] = React.useState("");
 
-  // Page 2: Story
+  // Page 2
   const [whatHappened, setWhatHappened] = React.useState("");
   const [howFundsUsed, setHowFundsUsed] = React.useState("");
 
-  // Page 3: Amount & Terms
+  // Page 3
   const [amountGbp, setAmountGbp] = React.useState("");
   const [repayDays, setRepayDays] = React.useState("");
 
-  // Page 4: Documents
+  // Page 4
   const [files, setFiles] = React.useState([]);
   const [noDocuments, setNoDocuments] = React.useState(false);
   const [dragging, setDragging] = React.useState(false);
 
-  // Page 5: Verification
+  // Page 5
   const [idvStatus, setIdvStatus] = React.useState("none");
   const [bankStatus, setBankStatus] = React.useState("none");
 
-  // Page 6: Review
+  // Page 6
   const [confirmAccurate, setConfirmAccurate] = React.useState(false);
   const [confirmTerms, setConfirmTerms] = React.useState(false);
   const [confirmReview, setConfirmReview] = React.useState(false);
@@ -88,7 +82,6 @@ export default function BorrowerApply() {
   const [info, setInfo] = React.useState("");
   const [validationResult, setValidationResult] = React.useState(null);
 
-  // Check verification status
   React.useEffect(() => {
     async function checkStatus() {
       try {
@@ -108,29 +101,22 @@ export default function BorrowerApply() {
     checkStatus();
   }, [userId, searchParams]);
 
-  // Drag and drop handlers
+  // Drag/drop
   function onDragOver(e) { e.preventDefault(); setDragging(true); }
   function onDragLeave() { setDragging(false); }
   function onDrop(e) {
-    e.preventDefault();
-    setDragging(false);
+    e.preventDefault(); setDragging(false);
     const dropped = Array.from(e.dataTransfer.files || []);
     if (dropped.length) setFiles((prev) => [...prev, ...dropped]);
   }
-  function onPickFiles(e) {
-    const selected = Array.from(e.target.files || []);
-    setFiles((prev) => [...prev, ...selected]);
-  }
-  function removeFile(idx) {
-    setFiles((prev) => prev.filter((_, i) => i !== idx));
-  }
+  function onPickFiles(e) { setFiles((prev) => [...prev, ...Array.from(e.target.files || [])]); }
+  function removeFile(idx) { setFiles((prev) => prev.filter((_, i) => i !== idx)); }
 
-  // Navigation validation
   function validateStep(s) {
     setError("");
     if (s === 1) {
       if (!category) return setError("Please select a category.");
-      if (!title.trim() || title.trim().length < 10) return setError("Please add a title (at least 10 characters).");
+      if (!title.trim() || title.trim().length < 10) return setError("Title must be at least 10 characters.");
       if (!city.trim() && !postcode.trim()) return setError("Please enter your city or postcode.");
     }
     if (s === 2) {
@@ -141,23 +127,17 @@ export default function BorrowerApply() {
       const gbp = Number(amountGbp);
       const days = Number(repayDays);
       if (!Number.isFinite(gbp) || gbp < 50 || gbp > 5000) return setError("Amount must be between £50 and £5,000.");
-      if (!Number.isFinite(days) || days < 3 || days > 180) return setError("Repayment period must be between 3 days and 6 months.");
+      if (!Number.isFinite(days) || days < 3 || days > 180) return setError("Repayment period: 3 days to 6 months.");
     }
     if (s === 4) {
-      if (!noDocuments && files.length === 0) return setError("Please upload at least one document, or check 'I don't have documents'.");
+      if (!noDocuments && files.length === 0) return setError("Upload at least one document, or check 'I don't have documents'.");
     }
     return true;
   }
 
-  function goNext() {
-    if (validateStep(step) !== true) return;
-    setStep((s) => s + 1);
-    setError("");
-    setInfo("");
-  }
+  function goNext() { if (validateStep(step) !== true) return; setStep((s) => s + 1); setError(""); setInfo(""); }
   function goBack() { setStep((s) => s - 1); setError(""); setInfo(""); }
 
-  // IDV
   async function onStartIdv() {
     setLoading(true); setError("");
     try {
@@ -197,7 +177,6 @@ export default function BorrowerApply() {
     setError(""); setStep(6);
   }
 
-  // Submit
   async function onSubmit() {
     setError(""); setInfo(""); setLoading(true);
     try {
@@ -261,36 +240,40 @@ export default function BorrowerApply() {
 
   function StatusBadge({ status, label }) {
     const colors = {
-      none: "bg-slate-100 text-slate-600", pending: "bg-yellow-100 text-yellow-700",
-      verified: "bg-emerald-100 text-emerald-700", connected: "bg-emerald-100 text-emerald-700",
-      failed: "bg-red-100 text-red-700", expired: "bg-orange-100 text-orange-700",
+      none: "bg-[var(--color-surface-warm)] text-[var(--color-text-muted)]",
+      pending: "bg-amber-50 text-amber-700",
+      verified: "bg-emerald-50 text-emerald-700",
+      connected: "bg-emerald-50 text-emerald-700",
+      failed: "bg-red-50 text-red-700",
+      expired: "bg-orange-50 text-orange-700",
     };
-    return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[status] || colors.none}`}>{label}</span>;
+    return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${colors[status] || colors.none}`}>{label}</span>;
   }
 
   const totalSteps = 6;
+
+  const stepLabels = ["Basics", "Your Story", "Amount & Terms", "Documents", "Verification", "Review & Submit"];
 
   return (
     <Page>
       <div className="space-y-6 max-w-2xl mx-auto">
         {/* Progress */}
         {step <= totalSteps && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-center gap-2">
+          <div className="space-y-3">
+            <div className="flex items-center justify-center gap-1.5">
               {Array.from({ length: totalSteps }, (_, i) => i + 1).map((s) => (
                 <React.Fragment key={s}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition ${
-                    step > s ? "bg-emerald-600 text-white" : step === s ? "bg-emerald-600 text-white ring-4 ring-emerald-200" : "bg-slate-200 text-slate-500"
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
+                    step > s ? "bg-emerald-600 text-white" : step === s ? "bg-emerald-700 text-white ring-4 ring-emerald-200/60" : "bg-[var(--color-surface-warm)] text-[var(--color-text-muted)] border border-[var(--color-border)]"
                   }`}>
                     {step > s ? "✓" : s}
                   </div>
-                  {s < totalSteps && <div className={`w-6 h-0.5 ${step > s ? "bg-emerald-500" : "bg-slate-200"}`} />}
+                  {s < totalSteps && <div className={`w-8 h-0.5 ${step > s ? "bg-emerald-500" : "bg-[var(--color-border)]"}`} />}
                 </React.Fragment>
               ))}
             </div>
-            <div className="text-center text-sm text-slate-500">
-              {step === 1 && "Basics"}{step === 2 && "Your Story"}{step === 3 && "Amount & Terms"}
-              {step === 4 && "Documents"}{step === 5 && "Verification"}{step === 6 && "Review & Submit"}
+            <div className="text-center text-sm font-medium text-[var(--color-text-muted)]">
+              {stepLabels[step - 1]}
             </div>
           </div>
         )}
@@ -301,13 +284,12 @@ export default function BorrowerApply() {
             <Card title="What do you need help with?" subtitle="Select a category and give your request a title.">
               <div className="space-y-5">
                 <div>
-                  <div className="mb-3 text-sm font-semibold text-slate-800">Category</div>
+                  <div className="mb-3 text-sm font-semibold">Category</div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {CATEGORIES.map((cat) => (
-                      <button key={cat.key} type="button"
-                        onClick={() => setCategory(cat.key)}
-                        className={`flex flex-col items-center gap-2 rounded-2xl border p-4 text-center transition ${
-                          category === cat.key ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-slate-200 hover:border-slate-300 text-slate-600"
+                      <button key={cat.key} type="button" onClick={() => setCategory(cat.key)}
+                        className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all ${
+                          category === cat.key ? "border-emerald-600 bg-emerald-50 text-emerald-700" : "border-[var(--color-border)] hover:border-emerald-300"
                         }`}>
                         <CategoryIcon category={cat.key} className="w-6 h-6" />
                         <span className="text-xs font-medium">{cat.label}</span>
@@ -320,8 +302,8 @@ export default function BorrowerApply() {
                   <Input label="City" value={city} onChange={(e) => setCity(e.target.value)} placeholder="e.g., Manchester" />
                   <Input label="Postcode" value={postcode} onChange={(e) => setPostcode(e.target.value)} placeholder="e.g., M1 4BT" />
                 </div>
-                <div className="text-xs text-slate-500">Only your area/borough will be shown publicly — never your exact address.</div>
-                {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+                <div className="text-xs text-[var(--color-text-subtle)]">Only your area/borough will be shown publicly — never your exact address.</div>
+                {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
                 <div className="flex justify-end"><Button onClick={goNext}>Continue</Button></div>
               </div>
             </Card>
@@ -334,20 +316,20 @@ export default function BorrowerApply() {
             <Card title="Tell us your story" subtitle="Be honest and specific. Your identity stays protected.">
               <div className="space-y-5">
                 <label className="block">
-                  <div className="mb-2 text-sm font-semibold text-slate-800">What happened?</div>
-                  <textarea className="min-h-[140px] w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-base outline-none focus:ring-2 focus:ring-emerald-200"
+                  <div className="mb-2 text-sm font-semibold">What happened?</div>
+                  <textarea className="min-h-[140px] w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-base outline-none transition focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 placeholder:text-[var(--color-text-subtle)]"
                     value={whatHappened} onChange={(e) => setWhatHappened(e.target.value)}
                     placeholder="Explain your situation — what led to this need?" />
-                  <div className="mt-1 text-xs text-slate-400">{whatHappened.length}/2000 characters</div>
+                  <div className="mt-1 text-xs text-[var(--color-text-subtle)]">{whatHappened.length}/2000 characters</div>
                 </label>
                 <label className="block">
-                  <div className="mb-2 text-sm font-semibold text-slate-800">How will the funds be used?</div>
-                  <textarea className="min-h-[100px] w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-base outline-none focus:ring-2 focus:ring-emerald-200"
+                  <div className="mb-2 text-sm font-semibold">How will the funds be used?</div>
+                  <textarea className="min-h-[100px] w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-base outline-none transition focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 placeholder:text-[var(--color-text-subtle)]"
                     value={howFundsUsed} onChange={(e) => setHowFundsUsed(e.target.value)}
                     placeholder="What specifically will the money pay for?" />
-                  <div className="mt-1 text-xs text-slate-400">{howFundsUsed.length}/500 characters</div>
+                  <div className="mt-1 text-xs text-[var(--color-text-subtle)]">{howFundsUsed.length}/500 characters</div>
                 </label>
-                {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+                {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
                 <div className="flex justify-between">
                   <Button variant="outline" onClick={goBack}>Back</Button>
                   <Button onClick={goNext}>Continue</Button>
@@ -363,35 +345,35 @@ export default function BorrowerApply() {
             <Card title="Amount & repayment" subtitle="Choose how much you need and when you'll repay.">
               <div className="space-y-5">
                 <div>
-                  <div className="mb-2 text-sm font-semibold text-slate-800">Amount needed (£)</div>
+                  <div className="mb-2 text-sm font-semibold">Amount needed (£)</div>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {AMOUNT_PRESETS.map((a) => (
                       <button key={a} type="button" onClick={() => setAmountGbp(String(a))}
-                        className={`rounded-xl border px-4 py-2 text-sm font-semibold transition ${
-                          amountGbp === String(a) ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-slate-200 hover:border-slate-300"
+                        className={`rounded-xl border-2 px-4 py-2.5 text-sm font-bold transition-all ${
+                          amountGbp === String(a) ? "border-emerald-600 bg-emerald-50 text-emerald-700" : "border-[var(--color-border)] hover:border-emerald-300"
                         }`}>£{a}</button>
                     ))}
                   </div>
                   <Input value={amountGbp} onChange={(e) => setAmountGbp(e.target.value)} inputMode="decimal" placeholder="Or enter custom amount" hint="£50 – £5,000" />
                 </div>
                 <div>
-                  <div className="mb-2 text-sm font-semibold text-slate-800">Repay by</div>
+                  <div className="mb-2 text-sm font-semibold">Repay by</div>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {TERM_PRESETS.map((t) => (
                       <button key={t.days} type="button" onClick={() => setRepayDays(String(t.days))}
-                        className={`rounded-xl border px-4 py-2 text-sm font-semibold transition ${
-                          repayDays === String(t.days) ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-slate-200 hover:border-slate-300"
+                        className={`rounded-xl border-2 px-4 py-2.5 text-sm font-bold transition-all ${
+                          repayDays === String(t.days) ? "border-emerald-600 bg-emerald-50 text-emerald-700" : "border-[var(--color-border)] hover:border-emerald-300"
                         }`}>{t.label}</button>
                     ))}
                   </div>
                   <Input value={repayDays} onChange={(e) => setRepayDays(e.target.value)} inputMode="numeric" placeholder="Or enter days" hint="3–180 days" />
                 </div>
                 {amountGbp && repayDays && (
-                  <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-800">
-                    You'll repay <strong>£{amountGbp}</strong> in full by <strong>{repayDays} days</strong> from approval. Zero interest.
+                  <div className="rounded-xl bg-emerald-50/80 border border-emerald-200/60 p-4 text-sm text-emerald-800">
+                    You'll repay <strong>£{amountGbp}</strong> in full within <strong>{repayDays} days</strong>. Zero interest.
                   </div>
                 )}
-                {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+                {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
                 <div className="flex justify-between">
                   <Button variant="outline" onClick={goBack}>Back</Button>
                   <Button onClick={goNext}>Continue</Button>
@@ -408,44 +390,40 @@ export default function BorrowerApply() {
               <div className="space-y-5">
                 {!noDocuments && (
                   <>
-                    <div
-                      onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-                      className={`rounded-2xl border-2 border-dashed p-8 text-center transition cursor-pointer ${
-                        dragging ? "border-emerald-500 bg-emerald-50" : "border-slate-300 hover:border-slate-400"
+                    <div onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                      className={`rounded-xl border-2 border-dashed p-8 text-center transition cursor-pointer ${
+                        dragging ? "border-emerald-500 bg-emerald-50" : "border-[var(--color-border)] hover:border-emerald-300"
                       }`}
-                      onClick={() => document.getElementById("file-input").click()}
-                    >
+                      onClick={() => document.getElementById("file-input").click()}>
                       <div className="text-3xl">📄</div>
-                      <div className="mt-2 text-sm font-semibold text-slate-700">
-                        Drag & drop files here, or click to browse
-                      </div>
-                      <div className="mt-1 text-xs text-slate-500">PDF, JPG, PNG — max 10MB each</div>
+                      <div className="mt-2 text-sm font-semibold">Drag & drop files here, or click to browse</div>
+                      <div className="mt-1 text-xs text-[var(--color-text-subtle)]">PDF, JPG, PNG — max 10MB each</div>
                       <input id="file-input" type="file" multiple onChange={onPickFiles} className="hidden" accept=".pdf,.jpg,.jpeg,.png" />
                     </div>
                     {files.length > 0 && (
                       <div className="space-y-2">
                         {files.map((f, i) => (
-                          <div key={i} className="flex items-center justify-between rounded-xl border p-3">
+                          <div key={i} className="flex items-center justify-between rounded-xl border border-[var(--color-border)] p-3">
                             <div className="text-sm truncate">{f.name}</div>
                             <button type="button" onClick={() => removeFile(i)} className="text-xs text-red-500 hover:text-red-700 font-semibold">Remove</button>
                           </div>
                         ))}
                       </div>
                     )}
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs text-[var(--color-text-subtle)]">
                       Suggested: payslip, bank statement, utility bill, medical letter, tenancy agreement, or invoice.
                     </div>
                   </>
                 )}
-                <label className="flex items-center gap-3 rounded-2xl border p-4 cursor-pointer hover:bg-slate-50 transition">
+                <label className="flex items-center gap-3 rounded-xl border-2 border-[var(--color-border)] p-4 cursor-pointer hover:border-emerald-300 transition">
                   <input type="checkbox" checked={noDocuments} onChange={(e) => { setNoDocuments(e.target.checked); if (e.target.checked) setFiles([]); }}
                     className="h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-200" />
                   <div>
-                    <div className="text-sm font-semibold text-slate-800">I don't have documents right now</div>
-                    <div className="text-xs text-slate-500">Your request will still be submitted but may take longer to review.</div>
+                    <div className="text-sm font-semibold">I don't have documents right now</div>
+                    <div className="text-xs text-[var(--color-text-muted)]">Your request will still be submitted but may take longer to review.</div>
                   </div>
                 </label>
-                {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+                {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
                 <div className="flex justify-between">
                   <Button variant="outline" onClick={goBack}>Back</Button>
                   <Button onClick={goNext}>Continue</Button>
@@ -460,18 +438,16 @@ export default function BorrowerApply() {
           <FadeIn>
             <Card title="Verify your identity" subtitle="To protect our community, we verify identity and financial situation.">
               <div className="space-y-6">
-                <div className="p-4 border border-slate-200 rounded-2xl">
+                <div className="p-5 border-2 border-[var(--color-border)] rounded-xl">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <h3 className="font-semibold text-slate-800">Identity Verification</h3>
-                      <p className="text-sm text-slate-600">Verify with a government ID</p>
+                      <h3 className="font-semibold font-heading">Identity Verification</h3>
+                      <p className="text-sm text-[var(--color-text-muted)]">Verify with a government ID</p>
                     </div>
                     <StatusBadge status={idvStatus} label={idvStatus === "verified" ? "Verified" : idvStatus === "pending" ? "Pending" : "Not started"} />
                   </div>
                   {idvStatus === "none" && (
-                    <Button onClick={onStartIdv} disabled={loading} variant="outline" className="w-full">
-                      {loading ? "Starting..." : "Start Verification"}
-                    </Button>
+                    <Button onClick={onStartIdv} disabled={loading} variant="outline" className="w-full">{loading ? "Starting..." : "Start Verification"}</Button>
                   )}
                   {idvStatus === "pending" && (
                     <div className="flex gap-2">
@@ -485,11 +461,11 @@ export default function BorrowerApply() {
                   )}
                 </div>
 
-                <div className="p-4 border border-slate-200 rounded-2xl">
+                <div className="p-5 border-2 border-[var(--color-border)] rounded-xl">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <h3 className="font-semibold text-slate-800">Link Your Bank Account</h3>
-                      <p className="text-sm text-slate-600">Connect your bank to verify affordability</p>
+                      <h3 className="font-semibold font-heading">Link Your Bank Account</h3>
+                      <p className="text-sm text-[var(--color-text-muted)]">Connect your bank to verify affordability</p>
                     </div>
                     <StatusBadge status={bankStatus} label={bankStatus === "connected" ? "Connected" : bankStatus === "pending" ? "Pending" : "Not linked"} />
                   </div>
@@ -499,8 +475,8 @@ export default function BorrowerApply() {
                   {bankStatus === "connected" && <div className="text-sm text-emerald-600 flex items-center gap-2">✓ Bank account linked</div>}
                 </div>
 
-                {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
-                {info && <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{info}</div>}
+                {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+                {info && <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{info}</div>}
 
                 <div className="flex justify-between">
                   <Button variant="outline" onClick={goBack}>Back</Button>
@@ -511,59 +487,66 @@ export default function BorrowerApply() {
           </FadeIn>
         )}
 
-        {/* Page 6: Review & Submit */}
+        {/* Page 6: Review */}
         {step === 6 && (
           <FadeIn>
             <Card title="Review & submit" subtitle="Please review your details before submitting.">
               <div className="space-y-4">
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="p-3 bg-slate-50 rounded-xl">
-                    <div className="text-xs text-slate-500 uppercase">Category</div>
-                    <div className="flex items-center gap-2 mt-1"><CategoryIcon category={category} className="w-4 h-4 text-emerald-600" /><span className="font-medium">{category}</span></div>
+                  <div className="p-4 bg-[var(--color-surface-warm)] rounded-xl">
+                    <div className="text-xs text-[var(--color-text-subtle)] uppercase tracking-wider">Category</div>
+                    <div className="flex items-center gap-2 mt-1.5"><CategoryIcon category={category} className="w-4 h-4 text-emerald-600" /><span className="font-medium">{category}</span></div>
                   </div>
-                  <div className="p-3 bg-slate-50 rounded-xl">
-                    <div className="text-xs text-slate-500 uppercase">Location</div>
-                    <div className="font-medium mt-1">{city}{city && postcode ? ", " : ""}{postcode}</div>
+                  <div className="p-4 bg-[var(--color-surface-warm)] rounded-xl">
+                    <div className="text-xs text-[var(--color-text-subtle)] uppercase tracking-wider">Location</div>
+                    <div className="font-medium mt-1.5">{city}{city && postcode ? ", " : ""}{postcode}</div>
                   </div>
                 </div>
-                <div className="p-3 bg-slate-50 rounded-xl"><div className="text-xs text-slate-500 uppercase">Title</div><div className="font-medium mt-1">{title}</div></div>
-                <div className="p-3 bg-slate-50 rounded-xl"><div className="text-xs text-slate-500 uppercase">What happened</div><div className="text-sm text-slate-700 mt-1 line-clamp-3">{whatHappened}</div></div>
+                <div className="p-4 bg-[var(--color-surface-warm)] rounded-xl">
+                  <div className="text-xs text-[var(--color-text-subtle)] uppercase tracking-wider">Title</div>
+                  <div className="font-medium mt-1.5">{title}</div>
+                </div>
+                <div className="p-4 bg-[var(--color-surface-warm)] rounded-xl">
+                  <div className="text-xs text-[var(--color-text-subtle)] uppercase tracking-wider">What happened</div>
+                  <div className="text-sm text-[var(--color-text-muted)] mt-1.5 line-clamp-3">{whatHappened}</div>
+                </div>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="p-3 bg-slate-50 rounded-xl"><div className="text-xs text-slate-500 uppercase">Amount</div><div className="text-lg font-semibold mt-1">£{amountGbp}</div></div>
-                  <div className="p-3 bg-slate-50 rounded-xl"><div className="text-xs text-slate-500 uppercase">Repay within</div><div className="text-lg font-semibold mt-1">{repayDays} days</div></div>
+                  <div className="p-4 bg-[var(--color-surface-warm)] rounded-xl">
+                    <div className="text-xs text-[var(--color-text-subtle)] uppercase tracking-wider">Amount</div>
+                    <div className="text-xl font-bold font-heading mt-1.5">£{amountGbp}</div>
+                  </div>
+                  <div className="p-4 bg-[var(--color-surface-warm)] rounded-xl">
+                    <div className="text-xs text-[var(--color-text-subtle)] uppercase tracking-wider">Repay within</div>
+                    <div className="text-xl font-bold font-heading mt-1.5">{repayDays} days</div>
+                  </div>
                 </div>
-                <div className="p-3 bg-slate-50 rounded-xl">
-                  <div className="text-xs text-slate-500 uppercase">Documents</div>
-                  <div className="text-sm mt-1">{noDocuments ? "None uploaded" : `${files.length} file(s)`}</div>
+                <div className="p-4 bg-[var(--color-surface-warm)] rounded-xl">
+                  <div className="text-xs text-[var(--color-text-subtle)] uppercase tracking-wider">Documents</div>
+                  <div className="text-sm mt-1.5">{noDocuments ? "None uploaded" : `${files.length} file(s)`}</div>
                 </div>
-                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
-                  <div className="text-xs text-emerald-600 uppercase">Verification</div>
-                  <div className="flex gap-4 mt-1 text-sm">
+                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200/60">
+                  <div className="text-xs text-emerald-600 uppercase tracking-wider">Verification</div>
+                  <div className="flex gap-4 mt-1.5 text-sm">
                     <span>Identity: <strong className="text-emerald-700">Verified</strong></span>
                     <span>Bank: <strong className="text-emerald-700">Connected</strong></span>
                   </div>
                 </div>
 
-                {/* Confirmation checkboxes */}
                 <div className="space-y-3 pt-2">
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input type="checkbox" checked={confirmAccurate} onChange={(e) => setConfirmAccurate(e.target.checked)}
-                      className="mt-0.5 h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-200" />
-                    <span className="text-sm text-slate-700">I confirm this information is accurate and truthful.</span>
-                  </label>
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input type="checkbox" checked={confirmTerms} onChange={(e) => setConfirmTerms(e.target.checked)}
-                      className="mt-0.5 h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-200" />
-                    <span className="text-sm text-slate-700">I agree to the repayment terms and Qard Hasan obligations.</span>
-                  </label>
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input type="checkbox" checked={confirmReview} onChange={(e) => setConfirmReview(e.target.checked)}
-                      className="mt-0.5 h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-200" />
-                    <span className="text-sm text-slate-700">I understand my request will be reviewed and I may be asked for more information.</span>
-                  </label>
+                  {[
+                    { checked: confirmAccurate, set: setConfirmAccurate, text: "I confirm this information is accurate and truthful." },
+                    { checked: confirmTerms, set: setConfirmTerms, text: "I agree to the repayment terms and Qard Hasan obligations." },
+                    { checked: confirmReview, set: setConfirmReview, text: "I understand my request will be reviewed and I may be asked for more information." },
+                  ].map((item, i) => (
+                    <label key={i} className="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" checked={item.checked} onChange={(e) => item.set(e.target.checked)}
+                        className="mt-0.5 h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-200" />
+                      <span className="text-sm text-[var(--color-text-muted)]">{item.text}</span>
+                    </label>
+                  ))}
                 </div>
 
-                {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+                {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
                 <div className="flex justify-between pt-2">
                   <Button variant="outline" onClick={goBack}>Back</Button>
                   <Button onClick={onSubmit} disabled={loading || !confirmAccurate || !confirmTerms || !confirmReview}>
@@ -578,24 +561,25 @@ export default function BorrowerApply() {
         {/* Page 7: Success */}
         {step === 7 && (
           <FadeIn>
-            <Card title={validationResult?.decision === "PASS" ? "Request Approved!" : validationResult?.decision === "DECLINE" ? "Request Declined" : "Request Submitted"}
-              subtitle={validationResult?.decision === "PASS" ? "Your request has been approved and is being processed." : "Your request is being reviewed by our team."}>
-              <div className="space-y-4">
-                <div className="flex justify-center py-6">
-                  <div className={`w-20 h-20 rounded-full flex items-center justify-center ${
-                    validationResult?.decision === "PASS" ? "bg-emerald-100" : validationResult?.decision === "DECLINE" ? "bg-red-100" : "bg-blue-100"
-                  }`}>
-                    <span className="text-4xl">{validationResult?.decision === "PASS" ? "✓" : validationResult?.decision === "DECLINE" ? "✗" : "⏳"}</span>
-                  </div>
-                </div>
-                {info && <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{info}</div>}
-                {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
-                <div className="flex flex-col gap-3 sm:flex-row sm:justify-center pt-4">
-                  <Button onClick={() => navigate("/app/lender")} variant="outline">View Dashboard</Button>
-                  <Button onClick={() => navigate("/app/home")}>Back to Home</Button>
-                </div>
+            <div className="text-center space-y-6 py-8">
+              <div className={`inline-flex w-20 h-20 rounded-full items-center justify-center text-4xl ${
+                validationResult?.decision === "PASS" ? "bg-emerald-100" : validationResult?.decision === "DECLINE" ? "bg-red-100" : "bg-blue-100"
+              }`}>
+                {validationResult?.decision === "PASS" ? "✓" : validationResult?.decision === "DECLINE" ? "✗" : "⏳"}
               </div>
-            </Card>
+              <h2 className="text-2xl font-bold font-heading">
+                {validationResult?.decision === "PASS" ? "Request Approved!" : validationResult?.decision === "DECLINE" ? "Request Declined" : "Request Submitted"}
+              </h2>
+              <p className="text-[var(--color-text-muted)] max-w-md mx-auto">
+                {validationResult?.decision === "PASS" ? "Your request has been approved and is being processed." : "Your request is being reviewed by our team."}
+              </p>
+              {info && <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 max-w-md mx-auto">{info}</div>}
+              {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 max-w-md mx-auto">{error}</div>}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+                <Button variant="outline" onClick={() => navigate("/app/borrower")}>View Dashboard</Button>
+                <Button onClick={() => navigate("/app/home")}>Back to Home</Button>
+              </div>
+            </div>
           </FadeIn>
         )}
       </div>

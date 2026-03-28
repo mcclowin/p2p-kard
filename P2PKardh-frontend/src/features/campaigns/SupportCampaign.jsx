@@ -3,8 +3,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import Card from "../../components/ui/Card.jsx";
 import Input from "../../components/ui/Input.jsx";
 import Button from "../../components/ui/Button.jsx";
-import { Page } from "../../components/ui/Motion.jsx";
+import { Page, FadeIn } from "../../components/ui/Motion.jsx";
 import { supportCheckoutApi } from "../../api/endpoints.js";
+
+const AMOUNT_PRESETS = [10, 25, 50, 100, 250, 500];
 
 export default function SupportCampaign() {
   const { id } = useParams();
@@ -59,62 +61,111 @@ export default function SupportCampaign() {
   return (
     <Page>
       <div className="space-y-6 max-w-xl mx-auto">
-        <Card
-          title="Support this campaign"
-          subtitle="You'll be redirected to a secure checkout."
-          footer={
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <Button variant="outline" onClick={() => navigate(`/app/campaigns/${id}`)}>
-                Back to details
-              </Button>
-              <Button onClick={onProceed} disabled={loading || !acceptTerms}>
-                {loading ? "Redirecting..." : "Proceed to support"}
-              </Button>
-            </div>
-          }
+        {/* Back link */}
+        <button
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-text-muted)] hover:text-emerald-700 transition"
+          onClick={() => navigate(`/app/campaigns/${id}`)}
         >
-          <div className="space-y-5">
-            <Input
-              label="Amount (£)"
-              inputMode="decimal"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              hint="Please support responsibly. Thank you for your kindness."
-            />
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+          Back to campaign
+        </button>
 
-            <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-5 text-sm text-slate-700">
-              <div className="font-semibold text-emerald-800">Qard Hasan — Interest-Free Loan</div>
-              <ul className="mt-2 list-disc pl-5 space-y-1 text-slate-600">
-                <li>This is an <strong>interest-free</strong> loan (Qard Hasan), not a donation.</li>
-                <li>The borrower is expected to repay the full amount by the stated date.</li>
-                <li>Borrower identity is protected throughout.</li>
-                <li>If the borrower faces hardship, you may be asked to extend or forgive the loan.</li>
-                <li>Repayment is handled securely through the platform.</li>
-              </ul>
-            </div>
-
-            <label className="flex items-start gap-3 rounded-2xl border p-4 cursor-pointer hover:bg-slate-50 transition">
-              <input
-                type="checkbox"
-                checked={acceptTerms}
-                onChange={(e) => setAcceptTerms(e.target.checked)}
-                className="mt-0.5 h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-200"
-              />
+        <FadeIn>
+          <Card
+            title="Lend a Hand"
+            subtitle="You're making an interest-free loan. You'll be redirected to secure checkout."
+          >
+            <div className="space-y-6">
+              {/* Amount presets */}
               <div>
-                <div className="text-sm font-semibold text-slate-800">
-                  I understand and accept the Qard Hasan terms
+                <div className="mb-3 text-sm font-semibold text-[var(--color-text)]">Choose an amount</div>
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  {AMOUNT_PRESETS.map((a) => (
+                    <button
+                      key={a}
+                      type="button"
+                      onClick={() => setAmount(String(a))}
+                      className={`rounded-xl border-2 px-3 py-2.5 text-sm font-bold transition-all ${
+                        amount === String(a)
+                          ? "border-emerald-600 bg-emerald-50 text-emerald-700"
+                          : "border-[var(--color-border)] hover:border-emerald-300 text-[var(--color-text)]"
+                      }`}
+                    >
+                      £{a}
+                    </button>
+                  ))}
                 </div>
-                <div className="text-xs text-slate-500">
-                  I acknowledge this is an interest-free loan and accept the terms above.
-                </div>
+                <Input
+                  label="Or enter a custom amount (£)"
+                  inputMode="decimal"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  hint="Please lend responsibly. Thank you for your kindness."
+                />
               </div>
-            </label>
 
-            {error && (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
-            )}
-          </div>
-        </Card>
+              {/* Qard Hasan terms */}
+              <div className="rounded-xl bg-emerald-50/80 border border-emerald-200/60 p-5 text-sm">
+                <div className="font-bold text-emerald-800 font-heading text-base">Qard Hasan — The Beautiful Loan</div>
+                <ul className="mt-3 space-y-2 text-[var(--color-text-muted)]">
+                  <li className="flex gap-2">
+                    <span className="text-emerald-600 font-bold">•</span>
+                    This is an <strong>interest-free</strong> loan, not a donation.
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-emerald-600 font-bold">•</span>
+                    The borrower will repay the full amount by the stated date.
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-emerald-600 font-bold">•</span>
+                    Borrower identity is protected throughout.
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-emerald-600 font-bold">•</span>
+                    If the borrower faces hardship, you may choose to extend or forgive.
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-emerald-600 font-bold">•</span>
+                    Repayment is handled securely through the platform.
+                  </li>
+                </ul>
+              </div>
+
+              {/* Terms checkbox */}
+              <label className="flex items-start gap-3 rounded-xl border-2 border-[var(--color-border)] p-4 cursor-pointer hover:border-emerald-300 transition-all">
+                <input
+                  type="checkbox"
+                  checked={acceptTerms}
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  className="mt-0.5 h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-200"
+                />
+                <div>
+                  <div className="text-sm font-semibold text-[var(--color-text)]">
+                    I understand and accept the Qard Hasan terms
+                  </div>
+                  <div className="text-xs text-[var(--color-text-muted)] mt-1">
+                    I acknowledge this is an interest-free loan and I accept the terms above.
+                  </div>
+                </div>
+              </label>
+
+              {error && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+              )}
+            </div>
+          </Card>
+        </FadeIn>
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            className="flex-1"
+            size="lg"
+            onClick={onProceed}
+            disabled={loading || !acceptTerms}
+          >
+            {loading ? "Redirecting to checkout..." : `Lend £${amount || "0"}`}
+          </Button>
+        </div>
       </div>
     </Page>
   );

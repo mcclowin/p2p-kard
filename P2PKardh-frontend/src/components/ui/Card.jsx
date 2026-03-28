@@ -1,16 +1,16 @@
 import React from "react";
 
-export default function Card({ title, subtitle, children, footer }) {
+export default function Card({ title, subtitle, children, footer, className = "" }) {
   return (
-    <div className="rounded-3xl border border-slate-200/70 bg-white/80 p-8 shadow-[0_18px_55px_rgba(2,6,23,0.10)] backdrop-blur">
+    <div className={`rounded-2xl border border-[var(--color-border)] bg-white p-6 sm:p-8 shadow-[var(--shadow-md)] ${className}`}>
       {(title || subtitle) && (
         <div className="mb-5">
-          {title && <div className="text-xl font-semibold tracking-tight">{title}</div>}
-          {subtitle && <div className="mt-2 text-base text-slate-600">{subtitle}</div>}
+          {title && <h2 className="text-xl font-semibold tracking-tight font-heading">{title}</h2>}
+          {subtitle && <div className="mt-2 text-base text-[var(--color-text-muted)]">{subtitle}</div>}
         </div>
       )}
       <div>{children}</div>
-      {footer && <div className="mt-6 border-t border-slate-200/70 pt-6">{footer}</div>}
+      {footer && <div className="mt-6 border-t border-[var(--color-border-light)] pt-6">{footer}</div>}
     </div>
   );
 }

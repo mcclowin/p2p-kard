@@ -1,30 +1,139 @@
 @import "tailwindcss";
 
-/* HandUp theme tokens — warm emerald + earth tones */
-:root{
-  --bg: 250 247 242;          /* warm off-white */
-  --surface: 255 255 255;     /* white */
-  --text: 15 23 42;           /* slate-900 */
-  --muted: 71 85 105;         /* slate-600 */
+/* ─── HandUp Design System ─── */
+/* Warm, trustworthy, community-oriented, dignified */
+/* Earth tones + emerald green. Not corporate. Not charity-pity. */
 
-  --brand: 5 150 105;         /* emerald-600 */
-  --brand-light: 209 250 229; /* emerald-100 */
-  --brand-2: 180 130 65;      /* warm gold accent */
-  --ring: 5 150 105;          /* emerald-600 */
+:root {
+  /* Core palette */
+  --color-bg: #faf7f2;
+  --color-surface: #ffffff;
+  --color-surface-warm: #f5f0e8;
+  --color-text: #1a1a1a;
+  --color-text-muted: #5a5a5a;
+  --color-text-subtle: #8a8a8a;
 
-  --earth: 120 100 80;        /* warm brown */
-  --sand: 245 235 220;        /* warm sand bg */
+  /* Brand: emerald + warm gold */
+  --color-emerald-50: #ecfdf5;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+  --color-emerald-700: #047857;
+  --color-emerald-800: #065f46;
+  --color-emerald-900: #064e3b;
 
-  --border: 226 232 240;      /* slate-200 */
-  --shadow: 2 6 23;           /* slate-950 */
+  --color-gold-50: #fef9f0;
+  --color-gold-100: #fdf0d5;
+  --color-gold-200: #f5deb3;
+  --color-gold-600: #b4841a;
+  --color-gold-700: #8a6514;
+
+  /* Earth tones */
+  --color-earth-50: #faf6f1;
+  --color-earth-100: #f0e8dc;
+  --color-earth-200: #e0d0b8;
+  --color-earth-600: #7a6548;
+  --color-earth-700: #5e4d36;
+
+  /* Borders & shadows */
+  --color-border: #e8e2d8;
+  --color-border-light: #f0ebe3;
+  --shadow-sm: 0 1px 3px rgba(26, 26, 26, 0.05);
+  --shadow-md: 0 4px 16px rgba(26, 26, 26, 0.08);
+  --shadow-lg: 0 12px 40px rgba(26, 26, 26, 0.10);
+  --shadow-xl: 0 20px 60px rgba(26, 26, 26, 0.12);
+
+  /* Spacing scale */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* Radii */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* Scale up slightly */
-html { font-size: 18px; }
-html, body { height: 100%; }
+/* ─── Base ─── */
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  height: 100%;
+}
+
 body {
   margin: 0;
   overflow-x: hidden;
-  background: rgb(var(--bg));
+  background: var(--color-bg);
+  font-family: var(--font-body);
+  color: var(--color-text);
+  line-height: 1.6;
 }
-* { min-width: 0; }
+
+* {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* ─── Typography helpers ─── */
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+/* Ensure headings use Playfair Display */
+h1, h2, h3 {
+  font-family: var(--font-heading);
+}
+
+/* ─── Selection ─── */
+::selection {
+  background: var(--color-emerald-200);
+  color: var(--color-emerald-900);
+}
+
+/* ─── Scrollbar (subtle) ─── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-earth-200);
+}
+
+/* ─── Focus ring ─── */
+:focus-visible {
+  outline: 2px solid var(--color-emerald-500);
+  outline-offset: 2px;
+}
+
+/* ─── Print ─── */
+@media print {
+  body { background: white; }
+  .no-print { display: none !important; }
+}

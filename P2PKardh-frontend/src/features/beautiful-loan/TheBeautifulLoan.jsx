@@ -3,11 +3,11 @@ import { Page, FadeIn } from "../../components/ui/Motion.jsx";
 
 function AyahCard({ arabic, translation, reference }) {
   return (
-    <div className="rounded-2xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50/80 to-white p-6 space-y-3">
-      <p className="text-right text-2xl leading-loose font-serif text-emerald-900" dir="rtl" lang="ar">
+    <div className="rounded-2xl border border-emerald-200/40 bg-gradient-to-br from-emerald-50/80 to-white p-6 space-y-3 shadow-[var(--shadow-sm)]">
+      <p className="text-right text-2xl leading-loose font-heading text-emerald-900" dir="rtl" lang="ar">
         {arabic}
       </p>
-      <p className="text-slate-700 italic leading-relaxed">"{translation}"</p>
+      <p className="text-[var(--color-text-muted)] italic leading-relaxed">"{translation}"</p>
       <p className="text-sm font-semibold text-emerald-700">{reference}</p>
     </div>
   );
@@ -15,8 +15,8 @@ function AyahCard({ arabic, translation, reference }) {
 
 function HadithCard({ text, source }) {
   return (
-    <div className="rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/60 to-white p-6 space-y-3">
-      <p className="text-slate-700 italic leading-relaxed">"{text}"</p>
+    <div className="rounded-2xl border border-amber-200/40 bg-gradient-to-br from-amber-50/60 to-white p-6 space-y-3 shadow-[var(--shadow-sm)]">
+      <p className="text-[var(--color-text-muted)] italic leading-relaxed">"{text}"</p>
       <p className="text-sm font-semibold text-amber-800">{source}</p>
     </div>
   );

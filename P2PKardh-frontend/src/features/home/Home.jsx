@@ -1,6 +1,5 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Card from "../../components/ui/Card.jsx";
 import Button from "../../components/ui/Button.jsx";
 import CategoryIcon from "../../components/ui/CategoryIcon.jsx";
 import { Page, FadeIn } from "../../components/ui/Motion.jsx";
@@ -35,9 +34,9 @@ function normalizeCampaign(c) {
 
 function ProgressBar({ value = 0 }) {
   return (
-    <div className="h-2.5 w-full rounded-full bg-emerald-100">
+    <div className="h-2 w-full rounded-full bg-emerald-100">
       <div
-        className="h-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all"
+        className="h-2 rounded-full bg-emerald-600 transition-all duration-500"
         style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
       />
     </div>
@@ -49,58 +48,59 @@ function CampaignCard({ c, onOpen, onSupport }) {
 
   return (
     <div
-      className="h-full rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-lg transition cursor-pointer flex flex-col"
+      className="group h-full rounded-2xl border border-[var(--color-border)] bg-white p-5 sm:p-6 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] transition-all duration-300 cursor-pointer flex flex-col"
       onClick={onOpen}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2 text-emerald-600">
+        <div className="flex items-center gap-2 text-emerald-700">
           <CategoryIcon category={c.category} className="w-5 h-5" />
-          <span className="text-xs font-semibold uppercase tracking-wide">{c.category}</span>
+          <span className="text-xs font-semibold uppercase tracking-wider">{c.category}</span>
         </div>
         {c.verified && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 border border-emerald-200/60">
             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
             Verified
           </span>
         )}
       </div>
 
-      <h3 className="mt-3 text-lg font-semibold leading-snug">{c.title}</h3>
+      <h3 className="mt-3 text-lg font-semibold leading-snug font-heading group-hover:text-emerald-800 transition-colors">{c.title}</h3>
 
       {c.locationArea && (
-        <div className="mt-1 flex items-center gap-1 text-xs text-slate-500">
+        <div className="mt-1.5 flex items-center gap-1.5 text-xs text-[var(--color-text-muted)]">
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
           {c.locationArea}
         </div>
       )}
 
-      <div className="mt-1 text-sm text-slate-500">
-        Return: ~{c.expectedReturnDays} days
+      <div className="mt-1 text-sm text-[var(--color-text-subtle)]">
+        Repayment: ~{c.expectedReturnDays} days
       </div>
 
       <div className="mt-auto pt-5 space-y-2">
         <div className="flex justify-between text-sm">
-          <span className="font-semibold text-emerald-700">£{c.pooled} raised</span>
-          <span className="text-slate-500">of £{c.amountNeeded}</span>
+          <span className="font-semibold text-emerald-700">£{c.pooled.toLocaleString()}</span>
+          <span className="text-[var(--color-text-muted)]">of £{c.amountNeeded.toLocaleString()}</span>
         </div>
         <ProgressBar value={pct} />
-        <div className="text-xs text-slate-400">{pct}% funded</div>
+        <div className="text-xs text-[var(--color-text-subtle)]">{pct}% funded</div>
       </div>
 
       <div className="mt-4">
         {c.status === "running" ? (
           <Button
             className="w-full"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation();
               onSupport();
             }}
           >
-            Support
+            Lend a Hand
           </Button>
         ) : (
-          <div className="rounded-xl bg-emerald-50 px-3 py-2 text-center text-sm font-semibold text-emerald-700">
-            ✓ Completed
+          <div className="rounded-xl bg-emerald-50 border border-emerald-200/60 px-3 py-2 text-center text-sm font-semibold text-emerald-700">
+            ✓ Fully funded
           </div>
         )}
       </div>
@@ -111,33 +111,80 @@ function CampaignCard({ c, onOpen, onSupport }) {
 function QardHasanExplainer() {
   return (
     <FadeIn delay={0.15}>
-      <div className="rounded-3xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50 to-white p-8 shadow-sm">
-        <h2 className="text-xl font-semibold text-emerald-800">What is Qard Hasan?</h2>
-        <p className="mt-3 text-slate-600 leading-relaxed">
-          <em>Qard Hasan</em> (قرض حسن) means "benevolent loan" — an interest-free loan given purely
+      <div className="rounded-2xl border border-emerald-200/40 bg-gradient-to-br from-emerald-50/80 via-white to-[var(--color-gold-50)] p-8 sm:p-10 shadow-[var(--shadow-sm)]">
+        <h2 className="text-2xl font-bold text-emerald-900 font-heading">What is Qard Hasan?</h2>
+        <p className="mt-4 text-[var(--color-text-muted)] leading-relaxed max-w-2xl">
+          <em className="text-emerald-800">Qard Hasan</em> (قرض حسن) means "the beautiful loan" — an interest-free loan given purely
           to help someone in need. Rooted in Islamic tradition but open to everyone, it's the idea that
           money should serve people, not exploit them.
         </p>
-        <blockquote className="mt-4 border-l-4 border-emerald-300 pl-4 text-sm italic text-slate-500">
+        <blockquote className="mt-5 border-l-4 border-emerald-400 pl-5 text-base italic text-[var(--color-text-muted)]">
           "Who is it that will lend Allah a goodly loan, that He may multiply it for him
-          and there will be a noble reward for him?" — Quran 57:11
+          and there will be a noble reward for him?"
+          <span className="block mt-1 not-italic text-sm font-semibold text-emerald-700">— Quran 57:11</span>
         </blockquote>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl bg-white/80 p-4 text-center">
-            <div className="text-2xl">🤝</div>
-            <div className="mt-1 text-sm font-semibold text-slate-800">Zero Interest</div>
-            <div className="mt-1 text-xs text-slate-500">No hidden fees, ever</div>
-          </div>
-          <div className="rounded-2xl bg-white/80 p-4 text-center">
-            <div className="text-2xl">🛡️</div>
-            <div className="mt-1 text-sm font-semibold text-slate-800">Identity Protected</div>
-            <div className="mt-1 text-xs text-slate-500">Dignity preserved always</div>
-          </div>
-          <div className="rounded-2xl bg-white/80 p-4 text-center">
-            <div className="text-2xl">🏘️</div>
-            <div className="mt-1 text-sm font-semibold text-slate-800">Community-Powered</div>
-            <div className="mt-1 text-xs text-slate-500">Neighbours helping neighbours</div>
-          </div>
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          {[
+            { icon: "🤝", title: "Zero Interest", desc: "No hidden fees, ever" },
+            { icon: "🛡️", title: "Identity Protected", desc: "Dignity preserved always" },
+            { icon: "🏘️", title: "Community-Powered", desc: "Neighbours helping neighbours" },
+          ].map((item) => (
+            <div key={item.title} className="rounded-xl bg-white/80 border border-[var(--color-border-light)] p-4 text-center shadow-[var(--shadow-sm)]">
+              <div className="text-2xl">{item.icon}</div>
+              <div className="mt-2 text-sm font-semibold text-[var(--color-text)]">{item.title}</div>
+              <div className="mt-1 text-xs text-[var(--color-text-muted)]">{item.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </FadeIn>
+  );
+}
+
+function HowItWorks() {
+  const steps = [
+    {
+      num: "01",
+      title: "Request a loan",
+      desc: "Tell us what you need and why. Your identity stays protected throughout.",
+      icon: "✍️",
+    },
+    {
+      num: "02",
+      title: "Get verified",
+      desc: "Quick ID check and bank link to keep the community safe for everyone.",
+      icon: "🔍",
+    },
+    {
+      num: "03",
+      title: "Receive support",
+      desc: "A community member lends you the full amount — zero interest, zero fees.",
+      icon: "💚",
+    },
+    {
+      num: "04",
+      title: "Repay when able",
+      desc: "Pay it back by the agreed date. If you're struggling, we'll work it out together.",
+      icon: "🔄",
+    },
+  ];
+
+  return (
+    <FadeIn delay={0.2}>
+      <div className="space-y-6">
+        <div className="text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[var(--color-text)] font-heading">How It Works</h2>
+          <p className="mt-2 text-[var(--color-text-muted)]">Simple, transparent, dignified.</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {steps.map((step) => (
+            <div key={step.num} className="rounded-2xl border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-sm)] text-center">
+              <div className="text-3xl mb-3">{step.icon}</div>
+              <div className="text-xs font-bold text-emerald-600 tracking-wider uppercase mb-2">Step {step.num}</div>
+              <h3 className="text-base font-semibold font-heading">{step.title}</h3>
+              <p className="mt-2 text-sm text-[var(--color-text-muted)] leading-relaxed">{step.desc}</p>
+            </div>
+          ))}
         </div>
       </div>
     </FadeIn>
@@ -182,64 +229,82 @@ export default function Home() {
 
   return (
     <Page>
-      <div className="space-y-8">
-        {/* Hero */}
+      <div className="space-y-12">
+        {/* ─── Hero ─── */}
         <FadeIn>
-          <div className="rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-700 p-10 text-white shadow-xl">
-            <h1 className="text-3xl sm:text-4xl font-bold leading-tight">
-              Community loans, zero interest,<br />full dignity.
-            </h1>
-            <p className="mt-4 max-w-2xl text-emerald-100 text-lg leading-relaxed">
-              HandUp connects people facing emergencies with community members willing to give
-              interest-free loans. No shame, no profit — just people helping people.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {isAuthed ? (
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-800 via-emerald-700 to-emerald-900 p-8 sm:p-12 lg:p-16 text-white shadow-[var(--shadow-xl)]">
+            {/* Decorative circles */}
+            <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-emerald-600/20 blur-3xl" />
+            <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-emerald-500/15 blur-2xl" />
+
+            <div className="relative z-10">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight font-heading">
+                Community loans.<br />
+                Zero interest.<br />
+                <span className="text-emerald-200">Full dignity.</span>
+              </h1>
+              <p className="mt-5 max-w-xl text-emerald-100 text-lg leading-relaxed">
+                HandUp connects people facing emergencies with neighbours willing to give
+                interest-free loans. No shame, no profit — just people helping people.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
                 <Button
-                  className="!bg-white !text-emerald-700 hover:!bg-emerald-50 !shadow-none"
-                  onClick={() => navigate("/app/borrower/apply")}
+                  variant="outline"
+                  className="!bg-white !text-emerald-800 !border-white hover:!bg-emerald-50 font-bold"
+                  size="lg"
+                  onClick={() => navigate(isAuthed ? "/app/borrower/apply" : "/register")}
                 >
-                  Request support
+                  I Need Help
                 </Button>
-              ) : (
-                <>
-                  <Button
-                    className="!bg-white !text-emerald-700 hover:!bg-emerald-50 !shadow-none"
-                    onClick={() => navigate("/register")}
-                  >
-                    Get started
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="!border-white/30 !text-white hover:!bg-white/10"
-                    onClick={() => navigate("/login")}
-                  >
-                    Sign in
-                  </Button>
-                </>
-              )}
+                <Button
+                  variant="outline"
+                  className="!border-emerald-300/40 !text-white hover:!bg-white/10"
+                  size="lg"
+                  onClick={() => {
+                    const el = document.getElementById("active-campaigns");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                    else navigate("/app/home");
+                  }}
+                >
+                  Help Someone
+                </Button>
+              </div>
             </div>
           </div>
         </FadeIn>
 
-        {/* Qard Hasan Explainer */}
+        {/* ─── Qard Hasan Explainer ─── */}
         <QardHasanExplainer />
 
+        {/* ─── How It Works ─── */}
+        <HowItWorks />
+
         {error && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
         )}
 
-        {/* Running campaigns */}
+        {/* ─── Active Campaigns ─── */}
         <FadeIn delay={0.1}>
-          <Card
-            title="Active campaigns"
-            subtitle="Your support helps complete the pool. Every contribution is returned to you."
-          >
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 items-stretch">
+          <section id="active-campaigns" className="space-y-6">
+            <div className="flex items-end justify-between">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold font-heading">People Who Need Help</h2>
+                <p className="mt-1 text-[var(--color-text-muted)]">
+                  Your support is returned to you. Every loan is interest-free.
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
               {loading ? (
-                <div className="text-slate-600">Loading...</div>
+                <div className="col-span-full text-center py-12 text-[var(--color-text-muted)]">
+                  <div className="inline-block w-6 h-6 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mb-3" />
+                  <p>Loading campaigns…</p>
+                </div>
               ) : running.length === 0 ? (
-                <div className="text-slate-500 col-span-full">No active campaigns at the moment. Check back soon.</div>
+                <div className="col-span-full text-center py-12">
+                  <p className="text-xl mb-2">🌱</p>
+                  <p className="text-[var(--color-text-muted)]">No active campaigns at the moment. Check back soon.</p>
+                </div>
               ) : (
                 running.map((c) => (
                   <CampaignCard
@@ -251,32 +316,59 @@ export default function Home() {
                 ))
               )}
             </div>
-          </Card>
+          </section>
         </FadeIn>
 
-        {/* Completed */}
-        <FadeIn delay={0.2}>
-          <Card
-            title="Previously completed"
-            subtitle="Thank you. These campaigns reached their goal."
-          >
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 items-stretch">
-              {loading ? (
-                <div className="text-slate-600">Loading...</div>
-              ) : completed.length === 0 ? (
-                <div className="text-slate-500 col-span-full">No completed campaigns yet.</div>
-              ) : (
-                completed.map((c) => (
+        {/* ─── Completed Campaigns ─── */}
+        {completed.length > 0 && (
+          <FadeIn delay={0.2}>
+            <section className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-bold font-heading">Community Impact</h2>
+                <p className="mt-1 text-[var(--color-text-muted)]">
+                  These loans reached their goal. Thank you to every lender.
+                </p>
+              </div>
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
+                {completed.map((c) => (
                   <CampaignCard
                     key={c.id}
                     c={c}
                     onOpen={() => navigate(`/app/campaigns/${c.id}`)}
                     onSupport={() => navigate(`/app/campaigns/${c.id}/support`)}
                   />
-                ))
-              )}
+                ))}
+              </div>
+            </section>
+          </FadeIn>
+        )}
+
+        {/* ─── CTA Section ─── */}
+        <FadeIn delay={0.25}>
+          <div className="rounded-2xl bg-gradient-to-r from-[var(--color-earth-50)] to-[var(--color-gold-50)] border border-[var(--color-border)] p-8 sm:p-12 text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold font-heading">Ready to make a difference?</h2>
+            <p className="mt-3 text-[var(--color-text-muted)] max-w-lg mx-auto">
+              Whether you need support or want to lend a hand, you're in the right place.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-4">
+              <Button
+                size="lg"
+                onClick={() => navigate(isAuthed ? "/app/borrower/apply" : "/register")}
+              >
+                Request a Loan
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => {
+                  const el = document.getElementById("active-campaigns");
+                  if (el) el.scrollIntoView({ behavior: "smooth" });
+                }}
+              >
+                Lend a Hand
+              </Button>
             </div>
-          </Card>
+          </div>
         </FadeIn>
       </div>
     </Page>
