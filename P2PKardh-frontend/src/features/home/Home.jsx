@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/ui/Button.jsx";
+import Input from "../../components/ui/Input.jsx";
 import CategoryIcon from "../../components/ui/CategoryIcon.jsx";
 import { Page, FadeIn } from "../../components/ui/Motion.jsx";
 import { homeApi } from "../../api/endpoints.js";
@@ -191,6 +192,77 @@ function HowItWorks() {
   );
 }
 
+function LocationFilter({ onFilter, onClear, activeArea }) {
+  const [postcode, setPostcode] = React.useState("");
+  const [resolving, setResolving] = React.useState(false);
+  const [lookupError, setLookupError] = React.useState("");
+
+  async function handleLookup() {
+    const clean = postcode.replace(/\s+/g, "").trim();
+    if (!clean) return;
+    setResolving(true);
+    setLookupError("");
+    try {
+      const res = await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(clean)}`);
+      const data = await res.json();
+      if (data.status === 200 && data.result) {
+        const ward = data.result.admin_ward || "";
+        const district = data.result.admin_district || "";
+        const area = ward && district ? `${ward}, ${district}` : district || ward;
+        if (area) {
+          onFilter(area, district);
+        } else {
+          setLookupError("Couldn't resolve area from this postcode.");
+        }
+      } else {
+        setLookupError("Invalid postcode. Please try again.");
+      }
+    } catch {
+      setLookupError("Couldn't look up postcode. Check your connection.");
+    } finally {
+      setResolving(false);
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-sm)]">
+      <div className="flex flex-col sm:flex-row gap-3 items-end">
+        <div className="flex-1 min-w-0">
+          <label className="block">
+            <div className="mb-1.5 text-sm font-semibold text-[var(--color-text)]">
+              <svg className="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              Find campaigns near you
+            </div>
+            <input
+              className="w-full rounded-xl border border-[var(--color-border)] px-4 py-2.5 text-sm bg-white outline-none transition focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 placeholder:text-[var(--color-text-subtle)]"
+              value={postcode}
+              onChange={(e) => setPostcode(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleLookup()}
+              placeholder="Enter your postcode (e.g. E8 1DY)"
+            />
+          </label>
+        </div>
+        <div className="flex gap-2">
+          <Button size="sm" onClick={handleLookup} disabled={resolving || !postcode.trim()}>
+            {resolving ? "Looking up..." : "Search"}
+          </Button>
+          {activeArea && (
+            <Button size="sm" variant="outline" onClick={() => { setPostcode(""); onClear(); }}>
+              Clear
+            </Button>
+          )}
+        </div>
+      </div>
+      {lookupError && <div className="mt-2 text-xs text-red-600">{lookupError}</div>}
+      {activeArea && (
+        <div className="mt-2 text-sm text-emerald-700 font-medium">
+          Showing campaigns near: <strong>{activeArea}</strong>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Home() {
   const navigate = useNavigate();
   const { isAuthed } = useAuthStore();
@@ -198,6 +270,8 @@ export default function Home() {
   const [error, setError] = React.useState("");
   const [running, setRunning] = React.useState([]);
   const [completed, setCompleted] = React.useState([]);
+  const [filterArea, setFilterArea] = React.useState("");
+  const [filterDistrict, setFilterDistrict] = React.useState("");
 
   React.useEffect(() => {
     let alive = true;
@@ -294,19 +368,44 @@ export default function Home() {
                 </p>
               </div>
             </div>
+
+            {/* Location filter */}
+            <LocationFilter
+              activeArea={filterArea}
+              onFilter={(area, district) => { setFilterArea(area); setFilterDistrict(district); }}
+              onClear={() => { setFilterArea(""); setFilterDistrict(""); }}
+            />
+
+            {(() => {
+              const filteredRunning = filterDistrict
+                ? running.filter((c) => {
+                    if (!c.locationArea) return false;
+                    const loc = c.locationArea.toLowerCase();
+                    return loc.includes(filterDistrict.toLowerCase());
+                  })
+                : running;
+
+              return (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
               {loading ? (
                 <div className="col-span-full text-center py-12 text-[var(--color-text-muted)]">
                   <div className="inline-block w-6 h-6 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mb-3" />
                   <p>Loading campaigns…</p>
                 </div>
-              ) : running.length === 0 ? (
+              ) : filteredRunning.length === 0 ? (
                 <div className="col-span-full text-center py-12">
                   <p className="text-xl mb-2">🌱</p>
-                  <p className="text-[var(--color-text-muted)]">No active campaigns at the moment. Check back soon.</p>
+                  <p className="text-[var(--color-text-muted)]">
+                    {filterArea ? `No active campaigns found near ${filterArea}.` : "No active campaigns at the moment. Check back soon."}
+                  </p>
+                  {filterArea && (
+                    <Button size="sm" variant="outline" className="mt-3" onClick={() => { setFilterArea(""); setFilterDistrict(""); }}>
+                      Show all campaigns
+                    </Button>
+                  )}
                 </div>
               ) : (
-                running.map((c) => (
+                filteredRunning.map((c) => (
                   <CampaignCard
                     key={c.id}
                     c={c}
@@ -316,6 +415,8 @@ export default function Home() {
                 ))
               )}
             </div>
+              );
+            })()}
           </section>
         </FadeIn>
 
