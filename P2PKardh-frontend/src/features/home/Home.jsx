@@ -446,7 +446,7 @@ export default function Home() {
 
         {/* ─── CTA Section ─── */}
         <FadeIn delay={0.25}>
-          <div className="rounded-2xl bg-gradient-to-r from-[var(--color-earth-50)] to-[var(--color-gold-50)] border border-[var(--color-border)] p-8 sm:p-12 text-center">
+          <div className="rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] p-8 sm:p-12 text-center shadow-[var(--shadow-md)]">
             <h2 className="text-2xl sm:text-3xl font-bold font-heading">Ready to make a difference?</h2>
             <p className="mt-3 text-[var(--color-text-muted)] max-w-lg mx-auto">
               Whether you need support or want to lend a hand, you're in the right place.

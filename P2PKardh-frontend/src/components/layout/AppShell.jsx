@@ -8,7 +8,7 @@ export default function AppShell() {
       <main className="mx-auto w-full max-w-6xl px-4 sm:px-6 pb-16 pt-8">
         <Outlet />
       </main>
-      <footer className="border-t border-[var(--color-border-light)] bg-white/60 backdrop-blur">
+      <footer className="border-t border-[var(--color-border-light)] bg-[var(--color-surface)] backdrop-blur">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-sm text-[var(--color-text-muted)]">
             © {new Date().getFullYear()} HandUp. Community lending, zero interest.
