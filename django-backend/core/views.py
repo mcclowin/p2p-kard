@@ -17,6 +17,7 @@ from core.utils import parse_prefixed_uuid
 
 
 class HomeView(APIView):
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     @extend_schema(responses=HomeResponseSerializer)
@@ -32,6 +33,7 @@ class HomeView(APIView):
 
 
 class CampaignDetailView(APIView):
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     @extend_schema(responses=CampaignDetailResponseSerializer)
@@ -60,6 +62,7 @@ class DashboardView(APIView):
 
 
 class HealthView(APIView):
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     @extend_schema(responses=None)
