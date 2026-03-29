@@ -410,7 +410,7 @@ export default function Home() {
                     key={c.id}
                     c={c}
                     onOpen={() => navigate(`/app/campaigns/${c.id}`)}
-                    onSupport={() => navigate(`/app/campaigns/${c.id}/support`)}
+                    onSupport={() => navigate(`/app/campaigns/${c.id}`)}
                   />
                 ))
               )}
@@ -436,7 +436,7 @@ export default function Home() {
                     key={c.id}
                     c={c}
                     onOpen={() => navigate(`/app/campaigns/${c.id}`)}
-                    onSupport={() => navigate(`/app/campaigns/${c.id}/support`)}
+                    onSupport={() => navigate(`/app/campaigns/${c.id}`)}
                   />
                 ))}
               </div>
