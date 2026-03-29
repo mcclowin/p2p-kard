@@ -30,6 +30,7 @@ function normalizeCampaign(c) {
     status,
     verified: c?.verified ?? c?.is_verified ?? false,
     locationArea: c?.location_area ?? c?.locationArea ?? null,
+    endorserName: c?.endorser_name ?? c?.endorserName ?? null,
   };
 }
 
@@ -71,6 +72,12 @@ function CampaignCard({ c, onOpen, onSupport }) {
         <div className="mt-1.5 flex items-center gap-1.5 text-xs text-[var(--color-text-muted)]">
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
           {c.locationArea}
+        </div>
+      )}
+
+      {c.endorserName && (
+        <div className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+          <span>🤝</span> Endorsed by {c.endorserName}
         </div>
       )}
 
@@ -160,12 +167,18 @@ function HowItWorks() {
     },
     {
       num: "03",
-      title: "Receive support",
-      desc: "A community member lends you the full amount — zero interest, zero fees.",
-      icon: "💚",
+      title: "Get endorsed",
+      desc: "Invite a trusted community member to vouch for you. Builds trust with lenders.",
+      icon: "🤝",
     },
     {
       num: "04",
+      title: "Receive support",
+      desc: "A single lender funds your full amount — zero interest, zero fees.",
+      icon: "💚",
+    },
+    {
+      num: "05",
       title: "Repay when able",
       desc: "Pay it back by the agreed date. If you're struggling, we'll work it out together.",
       icon: "🔄",
@@ -179,7 +192,7 @@ function HowItWorks() {
           <h2 className="text-2xl sm:text-3xl font-bold text-[var(--color-text)] font-heading">How It Works</h2>
           <p className="mt-2 text-[var(--color-text-muted)]">Simple, transparent, dignified.</p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {steps.map((step) => (
             <div key={step.num} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-sm)] text-center">
               <div className="text-3xl mb-3">{step.icon}</div>

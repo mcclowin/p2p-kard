@@ -34,6 +34,8 @@ class CampaignPublicSerializer(serializers.ModelSerializer):
 class CampaignCardSerializer(serializers.ModelSerializer):
     """Compact serializer for campaign cards (used by core/api_serializers imports)."""
 
+    endorser_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Campaign
         fields = [
@@ -47,7 +49,15 @@ class CampaignCardSerializer(serializers.ModelSerializer):
             "amount_pooled_cents",
             "expected_return_days",
             "expected_return_date",
+            "endorser_name",
         ]
+
+    def get_endorser_name(self, obj):
+        if obj.borrow_request_id:
+            endorsement = obj.borrow_request.endorsements.filter(status="COMPLETED").first()
+            if endorsement:
+                return endorsement.endorser_name
+        return None
 
 
 class CampaignDetailSerializer(serializers.ModelSerializer):
