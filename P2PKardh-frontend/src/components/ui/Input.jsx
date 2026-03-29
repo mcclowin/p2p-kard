@@ -5,7 +5,7 @@ export default function Input({ label, hint, error, className = "", ...props }) 
     <label className="block">
       {label && <div className="mb-2 text-sm font-semibold text-[var(--color-text)]">{label}</div>}
       <input
-        className={`w-full rounded-xl border px-4 py-3 text-base bg-white
+        className={`w-full rounded-xl border px-4 py-3 text-base bg-[var(--color-surface)]
         outline-none transition-all duration-200 placeholder:text-[var(--color-text-subtle)]
         focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 ${
           error ? "border-red-300" : "border-[var(--color-border)]"

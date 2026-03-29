@@ -123,7 +123,7 @@ export default function ContractView() {
                     className="mt-1 h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-200"
                   />
                   <span className="text-sm text-[var(--color-text-muted)]">
-                    I have read and understood the Qard Hasan (interest-free goodwill loan)
+                    I have read and understood the Qard Hasan (the benevolent loan — interest-free)
                     agreement above. I accept the terms and commit to repay the principal
                     amount in good faith.
                   </span>

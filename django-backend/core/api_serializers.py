@@ -5,6 +5,8 @@ from payments.models import Contribution
 from borrow.models import BorrowRequest
 
 from campaigns.serializers import CampaignCardSerializer, CampaignDetailSerializer
+from core.serializers import CamelCaseSerializerMixin
+from core.utils import prefixed_id
 
 
 class HomeResponseSerializer(serializers.Serializer):
@@ -36,7 +38,10 @@ class CampaignDetailResponseSerializer(serializers.Serializer):
     campaign = CampaignDetailSerializer()
 
 
-class BorrowRequestSummarySerializer(serializers.ModelSerializer):
+class BorrowRequestSummarySerializer(CamelCaseSerializerMixin, serializers.ModelSerializer):
+    id = serializers.SerializerMethodField()
+    endorsement = serializers.SerializerMethodField()
+
     class Meta:
         model = BorrowRequest
         fields = [
@@ -48,7 +53,23 @@ class BorrowRequestSummarySerializer(serializers.ModelSerializer):
             "currency",
             "expected_return_days",
             "created_at",
+            "endorsement",
         ]
+
+    def get_id(self, obj):
+        return prefixed_id("br", obj.id)
+
+    def get_endorsement(self, obj):
+        endorsement = obj.endorsements.order_by("-created_at").first()
+        if not endorsement:
+            return None
+        return {
+            "id": prefixed_id("end", endorsement.id),
+            "status": endorsement.status,
+            "inviteEmail": endorsement.invite_email,
+            "endorserName": endorsement.endorser_name,
+            "endorserTitle": endorsement.endorser_title,
+        }
 
 
 class DashboardResponseSerializer(serializers.Serializer):

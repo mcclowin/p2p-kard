@@ -4,7 +4,8 @@ import Card from "../../components/ui/Card.jsx";
 import Button from "../../components/ui/Button.jsx";
 import CategoryIcon from "../../components/ui/CategoryIcon.jsx";
 import { Page, FadeIn } from "../../components/ui/Motion.jsx";
-import { campaignDetailApi } from "../../api/endpoints.js";
+import { campaignDetailApi, getEndorsementsForRequestApi, requestEndorserContactApi } from "../../api/endpoints.js";
+import { useAuthStore } from "../../state/authStore.js";
 
 function ProgressBar({ value = 0 }) {
   return (
@@ -29,9 +30,13 @@ function StatBox({ label, value, accent = false }) {
 export default function CampaignDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAuthed } = useAuthStore();
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
   const [campaign, setCampaign] = React.useState(null);
+  const [endorsements, setEndorsements] = React.useState([]);
+  const [contactRequested, setContactRequested] = React.useState({});
+  const [contactLoading, setContactLoading] = React.useState({});
 
   React.useEffect(() => {
     let alive = true;
@@ -41,6 +46,15 @@ export default function CampaignDetails() {
         const res = await campaignDetailApi(id);
         if (!alive) return;
         setCampaign(res.campaign);
+
+        // Fetch endorsements for the borrow request
+        const brId = res.campaign?.borrow_request_id || res.campaign?.borrowRequestId;
+        if (brId) {
+          try {
+            const endRes = await getEndorsementsForRequestApi(brId);
+            if (alive) setEndorsements(endRes.endorsements || []);
+          } catch { /* endorsements not available, that's fine */ }
+        }
       } catch (e) {
         if (!alive) return;
         setError("Sorry — we couldn't load this campaign right now.");
@@ -48,6 +62,19 @@ export default function CampaignDetails() {
     })();
     return () => { alive = false; };
   }, [id]);
+
+  async function handleRequestContact(endorsementId) {
+    setContactLoading((prev) => ({ ...prev, [endorsementId]: true }));
+    try {
+      await requestEndorserContactApi(endorsementId);
+      setContactRequested((prev) => ({ ...prev, [endorsementId]: true }));
+    } catch (e) {
+      const detail = e?.response?.data?.detail || "Failed to send contact request.";
+      alert(detail);
+    } finally {
+      setContactLoading((prev) => ({ ...prev, [endorsementId]: false }));
+    }
+  }
 
   if (loading) {
     return (
@@ -81,7 +108,7 @@ export default function CampaignDetails() {
 
         {/* Header */}
         <FadeIn>
-          <div className="rounded-2xl border border-[var(--color-border)] bg-white p-6 sm:p-8 shadow-[var(--shadow-md)]">
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 sm:p-8 shadow-[var(--shadow-md)]">
             <div className="flex flex-wrap items-center gap-3 mb-4">
               <span className="flex items-center gap-1.5 text-emerald-700">
                 <CategoryIcon category={campaign.category} className="w-5 h-5" />
@@ -130,6 +157,48 @@ export default function CampaignDetails() {
           </Card>
         </FadeIn>
 
+        {/* Community Endorsement */}
+        {endorsements.length > 0 && (
+          <FadeIn delay={0.12}>
+            <Card title="🤝 Community Endorsement">
+              <div className="space-y-4">
+                {endorsements.map((end) => (
+                  <div key={end.id} className="space-y-3">
+                    <div className="text-sm font-semibold text-[var(--color-text)]">
+                      {end.endorserName}
+                      {end.endorserTitle && <span className="text-[var(--color-text-muted)] font-normal"> — {end.endorserTitle}</span>}
+                      {end.endorserAffiliation && <span className="text-[var(--color-text-muted)] font-normal">, {end.endorserAffiliation}</span>}
+                    </div>
+                    <blockquote className="border-l-4 border-emerald-300 pl-4 italic text-[var(--color-text-muted)]">
+                      "{end.vouchText}"
+                    </blockquote>
+                    {isAuthed && !contactRequested[end.id] && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={contactLoading[end.id]}
+                        onClick={() => handleRequestContact(end.id)}
+                      >
+                        {contactLoading[end.id] ? "Sending..." : "📩 Request Endorser Contact"}
+                      </Button>
+                    )}
+                    {contactRequested[end.id] && (
+                      <div className="text-sm text-emerald-700">
+                        ✓ Contact request sent! The endorser will be notified by email. You'll receive their details once they approve.
+                      </div>
+                    )}
+                    {!isAuthed && (
+                      <div className="text-xs text-[var(--color-text-muted)]">
+                        Log in to request the endorser's contact details.
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </FadeIn>
+        )}
+
         {/* Privacy note */}
         <div className="rounded-xl bg-[var(--color-earth-50)] border border-[var(--color-border)] p-4 text-sm text-[var(--color-text-muted)]">
           🛡️ Borrower identity is protected throughout. Our team verifies all documents internally.
@@ -137,14 +206,26 @@ export default function CampaignDetails() {
 
         {/* CTA */}
         <FadeIn delay={0.15}>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button size="lg" className="flex-1" onClick={() => navigate(`/app/campaigns/${campaignId}/support`)}>
-              Lend a Hand
-            </Button>
-            <Button variant="outline" size="lg" onClick={() => navigate("/app/home")}>
-              Browse other campaigns
-            </Button>
+          {pooled >= needed && needed > 0 ? (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-center">
+              <p className="text-lg font-semibold text-emerald-800">This loan has been fully funded 💚</p>
+              <Button variant="outline" className="mt-3" onClick={() => navigate("/app/home")}>Browse other campaigns</Button>
+            </div>
+          ) : (
+          <div className="space-y-3">
+            <div className="rounded-xl bg-[var(--color-surface-warm)] border border-[var(--color-border)] p-4 text-sm text-[var(--color-text-muted)] text-center">
+              This loan requires <strong>one lender</strong> to fund the full amount of <strong>£{(needed / 100).toLocaleString()}</strong>. The borrower repays you directly through the platform.
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button size="lg" className="flex-1" onClick={() => navigate(`/app/campaigns/${campaignId}/support`)}>
+                Fund this Loan — £{(needed / 100).toLocaleString()}
+              </Button>
+              <Button variant="outline" size="lg" onClick={() => navigate("/app/home")}>
+                Browse other campaigns
+              </Button>
+            </div>
           </div>
+          )}
         </FadeIn>
       </div>
     </Page>

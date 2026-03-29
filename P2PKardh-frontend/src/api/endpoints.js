@@ -129,6 +129,27 @@ export async function createBorrowRequestApi(payload) {
   return data; // { borrow_request: {...} } OR { borrowRequest: {...} } depending on serializer mixin
 }
 
+/** =========================
+ * DRAFT (Save for Later)
+ * ========================= */
+export async function getDraftApi() {
+  const { data } = await api.get("/api/v1/borrow-requests/draft");
+  return data; // { draft: {...} | null }
+}
+
+export async function createDraftApi(payload) {
+  const { data } = await api.post("/api/v1/borrow-requests/draft", payload);
+  return data; // { draft: {...} }
+}
+
+export async function saveDraftApi(borrowRequestId, payload) {
+  const { data } = await api.put(
+    `/api/v1/borrow-requests/${borrowRequestId}/draft`,
+    payload
+  );
+  return data; // { draft: {...} }
+}
+
 export async function presignBorrowDocsApi(borrowRequestId, files) {
   const { data } = await api.post(
     `/api/v1/borrow-requests/${borrowRequestId}/documents/presign`,
@@ -242,6 +263,44 @@ export const adminReleaseCampaignApi = async (campaignId, payload = {}) => {
   );
   return data;
 };
+
+/** =========================
+ * ENDORSEMENTS (JWT required for some)
+ * ========================= */
+export async function inviteEndorserApi(borrowRequestId, email) {
+  const { data } = await api.post("/api/v1/endorsements/invite", {
+    borrow_request_id: borrowRequestId,
+    invite_email: email,
+  });
+  return data;
+}
+
+export async function getEndorsementByTokenApi(token) {
+  const { data } = await api.get(`/api/v1/endorsements/${token}`);
+  return data;
+}
+
+export async function completeEndorsementApi(token, payload) {
+  const { data } = await api.post(`/api/v1/endorsements/${token}/complete`, payload);
+  return data;
+}
+
+export async function getEndorsementsForRequestApi(borrowRequestId) {
+  const { data } = await api.get(`/api/v1/endorsements/by-request/${borrowRequestId}`);
+  return data;
+}
+
+export async function requestEndorserContactApi(endorsementId) {
+  const { data } = await api.post(`/api/v1/endorsements/${endorsementId}/request-contact`);
+  return data;
+}
+
+export async function respondEndorserContactRequestApi(requestId, action) {
+  const { data } = await api.post(`/api/v1/endorsements/contact-requests/${requestId}/respond`, {
+    action,
+  });
+  return data;
+}
 
 /** =========================
  * VALIDATION SERVICE APIs (Direct calls to validation microservice)

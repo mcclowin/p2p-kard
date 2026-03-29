@@ -61,7 +61,7 @@ export default function DocsPage() {
               <h3 className="text-lg font-bold text-[var(--color-text)] pt-2">What the contract covers:</h3>
               <ul className="list-disc pl-6 space-y-2">
                 <li><strong>Parties</strong> — borrower and lender named (both verified), HandUp as witness</li>
-                <li><strong>Nature of the loan</strong> — explicitly defined as Qard Hasan (interest-free goodwill loan)</li>
+                <li><strong>Nature of the loan</strong> — explicitly defined as Qard Hasan (the benevolent loan — interest-free)</li>
                 <li><strong>Amount</strong> — exact principal in the agreed currency</li>
                 <li><strong>Zero-interest clause</strong> — prohibits interest, late fees, hidden charges, conditional benefits</li>
                 <li><strong>Repayment terms</strong> — principal-only repayment by the specified date</li>
@@ -109,7 +109,7 @@ export default function DocsPage() {
           <Card>
             <h2 className="text-2xl font-bold font-heading text-emerald-800 mb-6">Frequently Asked Questions</h2>
             <div className="space-y-5">
-              <FAQ q="What is Qard Hasan?" a="Qard Hasan (قرض حسن) means 'beautiful loan' or 'benevolent loan.' It's an interest-free loan given as an act of goodwill. The borrower repays only the exact amount they received — nothing more. It's rooted in Islamic tradition but the concept is universal: helping someone without profiting from their hardship." />
+              <FAQ q="What is Qard Hasan?" a="Qard Hasan (قرض حسن) means 'the benevolent loan.' It is an interest-free loan given as an act of goodwill. The borrower repays only the exact amount they received — nothing more. It's rooted in Islamic tradition but the concept is universal: helping someone without profiting from their hardship." />
               <FAQ q="Is this a charity? Will I get my money back?" a="HandUp is not a charity — it's a lending platform. Lenders are expected to get their money back. However, if a borrower faces genuine hardship, lenders are encouraged to grant extensions or forgive the debt. Forgiveness converts the loan into Sadaqah (charitable giving), which carries its own spiritual reward." />
               <FAQ q="Do I need to be Muslim to use HandUp?" a="No. HandUp is open to everyone. The principle of interest-free community lending is universal — it's simply the idea that you can help someone in need without profiting from their difficulty." />
               <FAQ q="How much can I borrow?" a="Between £50 and £5,000, with a repayment window of 3 days to 6 months. You can only have one active loan at a time." />

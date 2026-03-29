@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Card from "../../components/ui/Card.jsx";
 import Button from "../../components/ui/Button.jsx";
+import CategoryIcon from "../../components/ui/CategoryIcon.jsx";
 import { Page, FadeIn } from "../../components/ui/Motion.jsx";
 import { dashboardApi } from "../../api/endpoints.js";
 
@@ -33,11 +34,28 @@ function contractStatusLabel(status) {
   return labels[status] || status;
 }
 
+function ChevronIcon({ expanded, className = "" }) {
+  return (
+    <svg
+      className={`w-5 h-5 transition-transform duration-200 ${expanded ? "rotate-180" : ""} ${className}`}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
 export default function BorrowerDashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
   const [data, setData] = React.useState(null);
+  const [expandedId, setExpandedId] = React.useState(null);
 
   React.useEffect(() => {
     let alive = true;
@@ -63,6 +81,10 @@ export default function BorrowerDashboard() {
   const fundedLoans = borrowRequests.filter((r) =>
     ["VERIFIED", "FUNDED", "DISBURSED", "IN_REPAYMENT", "ACTIVE", "COMPLETED"].includes(r.status)
   );
+
+  function toggleExpand(id) {
+    setExpandedId((prev) => (prev === id ? null : id));
+  }
 
   return (
     <Page>
@@ -95,40 +117,173 @@ export default function BorrowerDashboard() {
                     const campaignId = r.campaign_id || r.campaignId;
                     const isFunded = ["FUNDED", "DISBURSED", "IN_REPAYMENT", "ACTIVE", "COMPLETED"].includes(r.status);
                     const contractStatus = r.contract_status || r.contractStatus;
+                    const isExpanded = expandedId === r.id;
+                    const story = r.reason_detailed || [r.what_happened, r.how_funds_used].filter(Boolean).join("\n\nFunds usage: ");
+                    const docCount = r.document_count ?? r.documents_count ?? r.documents?.length ?? 0;
+                    const createdDate = r.created_at || r.createdAt;
+                    const amountGbp = r.amount_requested_cents ? (r.amount_requested_cents / 100) : 0;
 
                     return (
-                      <div key={r.id} className="rounded-xl border border-[var(--color-border)] p-4 sm:p-5 space-y-3">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="min-w-0">
+                      <div key={r.id} className="rounded-xl border border-[var(--color-border)] overflow-hidden">
+                        {/* Header row — clickable */}
+                        <button
+                          type="button"
+                          onClick={() => toggleExpand(r.id)}
+                          className="w-full p-4 sm:p-5 flex items-start justify-between gap-4 text-left hover:bg-[var(--color-surface-warm)] transition-colors"
+                        >
+                          <div className="min-w-0 flex-1">
                             <div className="text-base font-semibold font-heading break-words">{r.title}</div>
                             <div className="mt-1 text-sm text-[var(--color-text-muted)]">
-                              Amount: <strong>£{(r.amount_requested_cents / 100).toLocaleString()}</strong> • Repay: ~{r.expected_return_days} days
+                              Amount: <strong>£{amountGbp.toLocaleString()}</strong> • Repay: ~{r.expected_return_days} days
                             </div>
                           </div>
-                          <Pill tone={r.status === "VERIFIED" || isFunded ? "good" : "neutral"}>{r.status}</Pill>
-                        </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Pill tone={r.status === "VERIFIED" || isFunded ? "good" : "neutral"}>{r.status}</Pill>
+                            <ChevronIcon expanded={isExpanded} className="text-[var(--color-text-muted)]" />
+                          </div>
+                        </button>
 
-                        {/* Contract section for funded loans */}
-                        {isFunded && campaignId && (
-                          <div className="rounded-lg bg-[var(--color-surface-warm)] border border-[var(--color-border-light)] p-4 flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-3">
-                              <span className="text-xl">📜</span>
-                              <div>
-                                <div className="text-sm font-semibold text-[var(--color-text)]">Loan Agreement</div>
-                                <div className="text-xs text-[var(--color-text-muted)]">
-                                  {contractStatus
-                                    ? `Status: ${contractStatusLabel(contractStatus)}`
-                                    : "View your Qard Hasan contract"}
+                        {/* Expanded detail */}
+                        {isExpanded && (
+                          <div className="border-t border-[var(--color-border)] p-4 sm:p-5 space-y-4 bg-[var(--color-surface)]">
+                            {/* Category & Location */}
+                            <div className="grid gap-3 sm:grid-cols-2">
+                              <div className="flex items-center gap-2 text-sm">
+                                <CategoryIcon category={r.category} className="w-5 h-5 text-emerald-600" />
+                                <span className="font-medium">{r.category || "—"}</span>
+                              </div>
+                              {(r.city || r.postcode) && (
+                                <div className="text-sm text-[var(--color-text-muted)]">
+                                  📍 {[r.city, r.postcode].filter(Boolean).join(", ")}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Story */}
+                            {story && (
+                              <div className="rounded-lg bg-[var(--color-surface-warm)] p-4">
+                                <div className="text-xs text-[var(--color-text-subtle)] uppercase tracking-wider mb-1.5">Your Story</div>
+                                <p className="text-sm text-[var(--color-text-muted)] whitespace-pre-line">{story}</p>
+                              </div>
+                            )}
+
+                            {/* Documents & Created date */}
+                            <div className="flex flex-wrap gap-4 text-sm text-[var(--color-text-muted)]">
+                              <span>📄 {docCount} document{docCount !== 1 ? "s" : ""} uploaded</span>
+                              {createdDate && (
+                                <span>🕐 Created {new Date(createdDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
+                              )}
+                            </div>
+
+                            {/* Endorsement status */}
+                            {(() => {
+                              const endorsement = r.endorsement;
+                              if (endorsement?.status === "INVITED") {
+                                return (
+                                  <div className="rounded-lg bg-amber-50/60 border border-amber-200/40 p-3 text-sm text-amber-800">
+                                    🕐 Endorsement invite sent to <strong>{endorsement.inviteEmail}</strong> — awaiting response
+                                  </div>
+                                );
+                              }
+                              if (endorsement?.status === "COMPLETED") {
+                                return (
+                                  <div className="rounded-lg bg-emerald-50/60 border border-emerald-200/40 p-3 text-sm text-emerald-800">
+                                    🤝 Endorsed by <strong>{endorsement.endorserName}</strong>
+                                    {endorsement.endorserTitle ? ` (${endorsement.endorserTitle})` : ""}
+                                  </div>
+                                );
+                              }
+                              return (
+                                <div className="rounded-lg bg-blue-50/60 border border-blue-200/40 p-3 text-sm text-blue-800">
+                                  💡 Tip: Invite a community member to endorse your request to build trust with potential lenders.
+                                </div>
+                              );
+                            })()}
+
+                            {/* Contract preview */}
+                            <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-4">
+                              <h3 className="text-sm font-bold text-[var(--color-text)] font-heading">
+                                📜 Qard Hasan Contract Preview
+                              </h3>
+
+                              <div className="text-sm text-[var(--color-text-muted)] space-y-3">
+                                <div>
+                                  <span className="font-semibold text-[var(--color-text)]">1. Nature:</span> This is a Qard Hasan (benevolent loan) — an interest-free loan rooted in the Islamic tradition of compassionate lending, open to all regardless of faith.
+                                </div>
+                                <div>
+                                  <span className="font-semibold text-[var(--color-text)]">2. Terms:</span> £{amountGbp.toLocaleString()} to be repaid in full within {r.expected_return_days} days. Zero interest, zero fees.
+                                </div>
+                                <div>
+                                  <span className="font-semibold text-[var(--color-text)]">3. Hardship:</span> If you face genuine hardship, the lender is encouraged to grant an extension or forgive part/all of the debt.
+                                </div>
+                                <div>
+                                  <span className="font-semibold text-[var(--color-text)]">4. Platform:</span> HandUp acts as facilitator and independent witness.
                                 </div>
                               </div>
+
+                              <div className="rounded-lg bg-amber-50 border border-amber-200/60 p-3 text-xs text-amber-800">
+                                <strong>Note:</strong> This contract was pre-signed by you upon submission. The lender's name will be added once your request is funded.
+                              </div>
+
+                              {isFunded && campaignId && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => navigate(`/app/contracts/${campaignId}`)}
+                                >
+                                  View Full Contract
+                                </Button>
+                              )}
                             </div>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => navigate(`/app/contracts/${campaignId}`)}
-                            >
-                              View Contract
-                            </Button>
+
+                            {/* Funded contract section (kept from original) */}
+                            {isFunded && campaignId && (
+                              <div className="rounded-lg bg-[var(--color-surface-warm)] border border-[var(--color-border-light)] p-4 flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-xl">📜</span>
+                                  <div>
+                                    <div className="text-sm font-semibold text-[var(--color-text)]">Loan Agreement</div>
+                                    <div className="text-xs text-[var(--color-text-muted)]">
+                                      {contractStatus
+                                        ? `Status: ${contractStatusLabel(contractStatus)}`
+                                        : "View your Qard Hasan contract"}
+                                    </div>
+                                  </div>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => navigate(`/app/contracts/${campaignId}`)}
+                                >
+                                  View Contract
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Non-expanded: still show funded contract inline */}
+                        {!isExpanded && isFunded && campaignId && (
+                          <div className="border-t border-[var(--color-border)] p-4 sm:p-5">
+                            <div className="rounded-lg bg-[var(--color-surface-warm)] border border-[var(--color-border-light)] p-4 flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-3">
+                                <span className="text-xl">📜</span>
+                                <div>
+                                  <div className="text-sm font-semibold text-[var(--color-text)]">Loan Agreement</div>
+                                  <div className="text-xs text-[var(--color-text-muted)]">
+                                    {contractStatus
+                                      ? `Status: ${contractStatusLabel(contractStatus)}`
+                                      : "View your Qard Hasan contract"}
+                                  </div>
+                                </div>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => { e.stopPropagation(); navigate(`/app/contracts/${campaignId}`); }}
+                              >
+                                View Contract
+                              </Button>
+                            </div>
                           </div>
                         )}
                       </div>

@@ -115,7 +115,7 @@ function QardHasanExplainer() {
       <div className="rounded-2xl border border-emerald-200/40 bg-gradient-to-br from-emerald-50/80 via-white to-[var(--color-gold-50)] p-8 sm:p-10 shadow-[var(--shadow-sm)]">
         <h2 className="text-2xl font-bold text-emerald-900 font-heading">What is Qard Hasan?</h2>
         <p className="mt-4 text-[var(--color-text-muted)] leading-relaxed max-w-2xl">
-          <em className="text-emerald-800">Qard Hasan</em> (قرض حسن) means "the beautiful loan" — an interest-free loan given purely
+          <em className="text-emerald-800">Qard Hasan</em> (قرض حسن) means "the benevolent loan" — an interest-free loan given purely
           to help someone in need. Rooted in Islamic tradition but open to everyone, it's the idea that
           money should serve people, not exploit them.
         </p>

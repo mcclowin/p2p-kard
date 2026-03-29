@@ -153,7 +153,7 @@ export default function Repayments() {
                     inputMode="decimal"
                     value={amountEur}
                     onChange={(e) => setAmountEur(e.target.value)}
-                    hint="You may repay in parts if needed."
+                    hint="Single repayment by the due date. If you're facing hardship, contact us."
                   />
                   <Button onClick={onPayNow} disabled={paying}>
                     {paying ? "Redirecting…" : "Pay securely"}

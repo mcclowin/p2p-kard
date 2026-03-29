@@ -6,22 +6,44 @@ import Button from "../../components/ui/Button.jsx";
 import { Page, FadeIn } from "../../components/ui/Motion.jsx";
 import { supportCheckoutApi } from "../../api/endpoints.js";
 
-const AMOUNT_PRESETS = [10, 25, 50, 100, 250, 500];
-
 export default function SupportCampaign() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [amount, setAmount] = React.useState("25");
+  const [campaign, setCampaign] = React.useState(null);
   const [acceptTerms, setAcceptTerms] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [loadingCampaign, setLoadingCampaign] = React.useState(true);
   const [error, setError] = React.useState("");
+
+  // Load campaign to get the full amount needed
+  React.useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const { campaignDetailApi } = await import("../../api/endpoints.js");
+        const res = await campaignDetailApi(id);
+        if (alive) setCampaign(res.campaign);
+      } catch (e) {
+        if (alive) setError("Could not load campaign details.");
+      } finally {
+        if (alive) setLoadingCampaign(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, [id]);
+
+  const amountNeededCents = campaign?.amount_needed_cents ?? campaign?.amountNeededCents ?? 0;
+  const amountPooledCents = campaign?.amount_pooled_cents ?? campaign?.amountPooledCents ?? 0;
+  const alreadyFunded = amountPooledCents >= amountNeededCents && amountNeededCents > 0;
+  const loanAmountGbp = (amountNeededCents / 100).toFixed(0);
+  const amount = loanAmountGbp;
 
   async function onProceed() {
     setError("");
-    const gbp = Number(amount);
+    const gbp = Number(loanAmountGbp);
     if (!Number.isFinite(gbp) || gbp <= 0) {
-      setError("Please enter a valid amount.");
+      setError("Could not determine the loan amount.");
       return;
     }
     if (!acceptTerms) {
@@ -76,37 +98,32 @@ export default function SupportCampaign() {
             subtitle="You're making an interest-free loan. You'll be redirected to secure checkout."
           >
             <div className="space-y-6">
-              {/* Amount presets */}
-              <div>
-                <div className="mb-3 text-sm font-semibold text-[var(--color-text)]">Choose an amount</div>
-                <div className="grid grid-cols-3 gap-2 mb-3">
-                  {AMOUNT_PRESETS.map((a) => (
-                    <button
-                      key={a}
-                      type="button"
-                      onClick={() => setAmount(String(a))}
-                      className={`rounded-xl border-2 px-3 py-2.5 text-sm font-bold transition-all ${
-                        amount === String(a)
-                          ? "border-emerald-600 bg-emerald-50 text-emerald-700"
-                          : "border-[var(--color-border)] hover:border-emerald-300 text-[var(--color-text)]"
-                      }`}
-                    >
-                      £{a}
-                    </button>
-                  ))}
+              {/* Loan amount — fixed (1 lender funds the full amount) */}
+              {loadingCampaign ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="inline-block w-6 h-6 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
                 </div>
-                <Input
-                  label="Or enter a custom amount (£)"
-                  inputMode="decimal"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  hint="Please lend responsibly. Thank you for your kindness."
-                />
+              ) : alreadyFunded ? (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-center">
+                  <p className="text-lg font-semibold text-emerald-800">This loan has already been funded 💚</p>
+                  <p className="text-sm text-[var(--color-text-muted)] mt-2">Thank you for your interest. Browse other campaigns to help someone else.</p>
+                  <Button variant="outline" className="mt-4" onClick={() => navigate("/app/home")}>Browse Campaigns</Button>
+                </div>
+              ) : (
+              <div>
+                <div className="mb-3 text-sm font-semibold text-[var(--color-text)]">Loan amount</div>
+                <div className="rounded-xl border-2 border-emerald-600 bg-emerald-50 p-5 text-center">
+                  <div className="text-3xl font-bold font-heading text-emerald-700">£{loanAmountGbp}</div>
+                  <div className="text-sm text-[var(--color-text-muted)] mt-2">
+                    As a single lender, you fund the full loan amount. The borrower repays you directly through the platform.
+                  </div>
+                </div>
               </div>
+              )}
 
               {/* Qard Hasan terms */}
               <div className="rounded-xl bg-emerald-50/80 border border-emerald-200/60 p-5 text-sm">
-                <div className="font-bold text-emerald-800 font-heading text-base">Qard Hasan — The Beautiful Loan</div>
+                <div className="font-bold text-emerald-800 font-heading text-base">Qard Hasan — The Benevolent Loan</div>
                 <ul className="mt-3 space-y-2 text-[var(--color-text-muted)]">
                   <li className="flex gap-2">
                     <span className="text-emerald-600 font-bold">•</span>
@@ -156,6 +173,7 @@ export default function SupportCampaign() {
           </Card>
         </FadeIn>
 
+        {!alreadyFunded && !loadingCampaign && (
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
             className="flex-1"
@@ -163,9 +181,10 @@ export default function SupportCampaign() {
             onClick={onProceed}
             disabled={loading || !acceptTerms}
           >
-            {loading ? "Redirecting to checkout..." : `Lend £${amount || "0"}`}
+            {loading ? "Redirecting to checkout..." : `Lend £${amount}`}
           </Button>
         </div>
+        )}
       </div>
     </Page>
   );

@@ -2,7 +2,7 @@ import React from "react";
 
 export default function Card({ title, subtitle, children, footer, className = "" }) {
   return (
-    <div className={`rounded-2xl border border-[var(--color-border)] bg-white p-6 sm:p-8 shadow-[var(--shadow-md)] ${className}`}>
+    <div className={`rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 sm:p-8 shadow-[var(--shadow-md)] ${className}`}>
       {(title || subtitle) && (
         <div className="mb-5">
           {title && <h2 className="text-xl font-semibold tracking-tight font-heading">{title}</h2>}

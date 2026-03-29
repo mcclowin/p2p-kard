@@ -34,7 +34,7 @@ export default function TheBeautifulLoan() {
               The Beautiful Loan
             </h1>
             <p className="text-lg text-slate-600 max-w-xl mx-auto leading-relaxed">
-              <em>Qard Hasan</em> — an ancient practice of lending without interest,
+              <em>Qard Hasan</em> — the benevolent loan. An ancient practice of lending without interest,
               rooted in compassion and community.
             </p>
           </header>
@@ -45,7 +45,7 @@ export default function TheBeautifulLoan() {
           <section className="space-y-4">
             <h2 className="text-2xl font-bold text-slate-900 font-serif">What is Qard Hasan?</h2>
             <p className="text-slate-700 leading-relaxed">
-              In Arabic, <em>Qard Hasan</em> (قرض حسن) literally means "a beautiful loan" or
+              In Arabic, <em>Qard Hasan</em> (قرض حسن) literally means "a benevolent loan" or
               "a goodly loan." It refers to lending money to someone in need with no expectation
               of interest, profit, or any return beyond the principal. It's not charity — the
               borrower is expected to repay — but it is an act of deep generosity, because the

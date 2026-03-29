@@ -12,6 +12,7 @@ class Currency(models.TextChoices):
 
 
 class BorrowRequestStatus(models.TextChoices):
+    DRAFT = "DRAFT", "Draft"
     SUBMITTED = "SUBMITTED", "Submitted"
     UNDER_REVIEW = "UNDER_REVIEW", "Under review"
     VERIFIED = "VERIFIED", "Verified"
@@ -34,15 +35,24 @@ class BorrowRequest(models.Model):
     requester = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name="borrow_requests", on_delete=models.CASCADE
     )
-    title = models.CharField(max_length=255)
-    category = models.CharField(max_length=100)
-    reason_detailed = models.TextField()
-    amount_requested_cents = models.PositiveBigIntegerField(validators=[MinValueValidator(0)])
+    title = models.CharField(max_length=255, blank=True)
+    category = models.CharField(max_length=100, blank=True)
+    reason_detailed = models.TextField(blank=True)
+    amount_requested_cents = models.PositiveBigIntegerField(
+        validators=[MinValueValidator(0)], null=True, blank=True
+    )
     currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.GBP)
-    expected_return_days = models.PositiveIntegerField(validators=[MinValueValidator(0)])
+    expected_return_days = models.PositiveIntegerField(
+        validators=[MinValueValidator(0)], null=True, blank=True
+    )
     status = models.CharField(
         max_length=30, choices=BorrowRequestStatus.choices, default=BorrowRequestStatus.SUBMITTED
     )
+    city = models.CharField(max_length=100, blank=True)
+    postcode = models.CharField(max_length=20, blank=True)
+    what_happened = models.TextField(blank=True)
+    how_funds_used = models.TextField(blank=True)
+    current_step = models.PositiveIntegerField(default=1)
     admin_note_internal = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

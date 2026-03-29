@@ -1,6 +1,8 @@
 from django.urls import path
 
 from .views import (
+    BorrowDraftUpdateView,
+    BorrowDraftView,
     BorrowRequestConfirmDocumentsView,
     BorrowRequestCreateView,
     BorrowRequestPresignView,
@@ -8,6 +10,12 @@ from .views import (
 
 urlpatterns = [
     path("borrow-requests", BorrowRequestCreateView.as_view(), name="borrow-request-create"),
+    path("borrow-requests/draft", BorrowDraftView.as_view(), name="borrow-draft"),
+    path(
+        "borrow-requests/<str:borrow_request_id>/draft",
+        BorrowDraftUpdateView.as_view(),
+        name="borrow-draft-update",
+    ),
     path(
         "borrow-requests/<str:borrow_request_id>/documents/presign",
         BorrowRequestPresignView.as_view(),

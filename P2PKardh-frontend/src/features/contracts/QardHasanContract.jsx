@@ -34,7 +34,7 @@ export default function QardHasanContract() {
             <div className="rounded-2xl border p-5 space-y-3">
               <h4 className="font-semibold text-slate-800">Key Terms</h4>
               <ul className="text-sm text-slate-600 space-y-2 list-disc pl-5">
-                <li><strong>Nature:</strong> This is a Qard Hasan — an interest-free goodwill loan.</li>
+                <li><strong>Nature:</strong> This is a Qard Hasan — the benevolent loan. Interest-free, rooted in compassion.</li>
                 <li><strong>Zero Interest:</strong> No interest, late fees, hidden charges, or conditional benefits shall apply.</li>
                 <li><strong>Repayment:</strong> The borrower shall repay the principal amount only, by the agreed date.</li>
                 <li><strong>Hardship:</strong> If the borrower faces genuine hardship, extensions are encouraged. Forgiveness is an act of virtue.</li>

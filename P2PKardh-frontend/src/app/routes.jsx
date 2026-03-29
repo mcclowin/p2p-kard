@@ -17,6 +17,8 @@ import BorrowerApply from "../features/borrower/BorrowerApply.jsx";
 import BorrowerDashboard from "../features/borrower/BorrowerDashboard.jsx";
 import Repayments from "../features/repayments/Repayments.jsx";
 import ContractView from "../features/contracts/ContractView.jsx";
+import Settings from "../features/settings/Settings.jsx";
+import EndorserVouch from "../features/endorsements/EndorserVouch.jsx";
 
 // Admin screens
 import AdminBorrowRequests from "../features/admin/AdminBorrowRequests.jsx";
@@ -57,6 +59,7 @@ export function AppRoutes() {
         <Route path="the-beautiful-loan" element={<TheBeautifulLoan />} />
         <Route path="docs" element={<DocsPage />} />
         <Route path="campaigns/:id" element={<CampaignDetails />} />
+        <Route path="endorse/:token" element={<EndorserVouch />} />
 
         {/* Auth required */}
         <Route
@@ -104,6 +107,14 @@ export function AppRoutes() {
           element={
             <RequireAuth>
               <BorrowerApply />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="settings"
+          element={
+            <RequireAuth>
+              <Settings />
             </RequireAuth>
           }
         />

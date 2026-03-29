@@ -11,8 +11,10 @@ from rest_framework.views import APIView
 
 from core.utils import parse_prefixed_uuid, prefixed_id
 
-from .models import BorrowDocument, BorrowDocumentStatus, BorrowRequest
+from .models import BorrowDocument, BorrowDocumentStatus, BorrowRequest, BorrowRequestStatus
 from .serializers import (
+    BorrowDraftResponseSerializer,
+    BorrowDraftSerializer,
     BorrowRequestCreateResponseSerializer,
     BorrowRequestCreateSerializer,
     ConfirmDocumentsResponseSerializer,
@@ -29,13 +31,95 @@ class BorrowRequestCreateView(APIView):
 
     @extend_schema(request=BorrowRequestCreateSerializer, responses=BorrowRequestCreateResponseSerializer)
     def post(self, request):
+        # If a draft exists, update it to SUBMITTED instead of creating new
+        draft = (
+            BorrowRequest.objects.filter(
+                requester=request.user, status=BorrowRequestStatus.DRAFT
+            )
+            .order_by("-created_at")
+            .first()
+        )
+
         serializer = BorrowRequestCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        borrow_request = serializer.save(requester=request.user)
+
+        if draft:
+            for attr, value in serializer.validated_data.items():
+                setattr(draft, attr, value)
+            draft.status = BorrowRequestStatus.SUBMITTED
+            draft.save()
+            borrow_request = draft
+        else:
+            borrow_request = serializer.save(requester=request.user)
+
         return Response(
             {"borrowRequest": {"id": prefixed_id("br", borrow_request.id), "status": borrow_request.status}},
             status=status.HTTP_201_CREATED,
         )
+
+
+class BorrowDraftView(APIView):
+    """GET current user's latest draft."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        draft = (
+            BorrowRequest.objects.filter(
+                requester=request.user, status=BorrowRequestStatus.DRAFT
+            )
+            .order_by("-created_at")
+            .first()
+        )
+        if not draft:
+            return Response({"draft": None}, status=status.HTTP_200_OK)
+        serializer = BorrowDraftResponseSerializer(draft)
+        return Response({"draft": serializer.data}, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        """Create a new draft, or update the latest existing draft."""
+        existing_draft = (
+            BorrowRequest.objects.filter(
+                requester=request.user, status=BorrowRequestStatus.DRAFT
+            )
+            .order_by("-created_at")
+            .first()
+        )
+
+        if existing_draft:
+            serializer = BorrowDraftSerializer(existing_draft, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            response_serializer = BorrowDraftResponseSerializer(existing_draft)
+            return Response({"draft": response_serializer.data}, status=status.HTTP_200_OK)
+
+        serializer = BorrowDraftSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        draft = serializer.save(requester=request.user, status=BorrowRequestStatus.DRAFT)
+        response_serializer = BorrowDraftResponseSerializer(draft)
+        return Response({"draft": response_serializer.data}, status=status.HTTP_201_CREATED)
+
+
+class BorrowDraftUpdateView(APIView):
+    """PUT partial update on an existing draft."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def put(self, request, borrow_request_id):
+        borrow_request_id = parse_prefixed_uuid("br", borrow_request_id)
+        if borrow_request_id is None:
+            return Response({"detail": "Invalid borrow request id."}, status=status.HTTP_400_BAD_REQUEST)
+        draft = get_object_or_404(
+            BorrowRequest,
+            id=borrow_request_id,
+            requester=request.user,
+            status=BorrowRequestStatus.DRAFT,
+        )
+        serializer = BorrowDraftSerializer(draft, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        response_serializer = BorrowDraftResponseSerializer(draft)
+        return Response({"draft": response_serializer.data}, status=status.HTTP_200_OK)
 
 
 class BorrowRequestPresignView(APIView):

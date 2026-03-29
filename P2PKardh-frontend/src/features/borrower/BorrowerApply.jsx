@@ -15,6 +15,10 @@ import {
   startIdvSessionApi,
   refreshIdvStatusApi,
   runValidationApi,
+  getDraftApi,
+  createDraftApi,
+  saveDraftApi,
+  inviteEndorserApi,
 } from "../../api/endpoints.js";
 
 const CATEGORIES = [
@@ -75,12 +79,89 @@ export default function BorrowerApply() {
   const [confirmTerms, setConfirmTerms] = React.useState(false);
   const [confirmReview, setConfirmReview] = React.useState(false);
 
+  // Draft
+  const [draftId, setDraftId] = React.useState(null);
+  const [draftBanner, setDraftBanner] = React.useState(false);
+
   // UI
   const [step, setStep] = React.useState(1);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
   const [info, setInfo] = React.useState("");
   const [validationResult, setValidationResult] = React.useState(null);
+
+  // Load existing draft on mount
+  React.useEffect(() => {
+    async function loadDraft() {
+      try {
+        const res = await getDraftApi();
+        if (res.draft) {
+          const d = res.draft;
+          setDraftId(d.id);
+          if (d.title) setTitle(d.title);
+          if (d.category) setCategory(d.category);
+          if (d.city) setCity(d.city);
+          if (d.postcode) setPostcode(d.postcode);
+          if (d.whatHappened) setWhatHappened(d.whatHappened);
+          if (d.howFundsUsed) setHowFundsUsed(d.howFundsUsed);
+          if (d.amountRequestedCents) setAmountGbp(String(d.amountRequestedCents / 100));
+          if (d.expectedReturnDays) setRepayDays(String(d.expectedReturnDays));
+          if (d.currentStep && d.currentStep > 1) setStep(d.currentStep);
+          setDraftBanner(true);
+          setTimeout(() => setDraftBanner(false), 4000);
+        }
+      } catch (err) {
+        console.log("No draft found:", err);
+      }
+    }
+    loadDraft();
+  }, []);
+
+  // Helper: collect current form data for draft saving
+  function collectDraftData(nextStep = step + 1) {
+    return {
+      title: title.trim(),
+      category,
+      city: city.trim(),
+      postcode: postcode.trim(),
+      reason_detailed: `${whatHappened.trim()}\n\nFunds usage: ${howFundsUsed.trim()}`.trim(),
+      what_happened: whatHappened.trim(),
+      how_funds_used: howFundsUsed.trim(),
+      amount_requested_cents: amountGbp ? Math.round(Number(amountGbp) * 100) : null,
+      currency: "GBP",
+      expected_return_days: repayDays ? Number(repayDays) : null,
+      current_step: nextStep,
+    };
+  }
+
+  async function autoSaveDraft() {
+    try {
+      const data = collectDraftData();
+      if (draftId) {
+        await saveDraftApi(draftId, data);
+      } else {
+        const res = await createDraftApi(data);
+        if (res.draft?.id) setDraftId(res.draft.id);
+      }
+    } catch (err) {
+      console.log("Draft auto-save failed:", err);
+    }
+  }
+
+  async function handleSaveAndExit() {
+    try {
+      const data = collectDraftData(step);
+      if (draftId) {
+        await saveDraftApi(draftId, data);
+      } else {
+        const res = await createDraftApi(data);
+        if (res.draft?.id) setDraftId(res.draft.id);
+      }
+      navigate("/app/borrower");
+    } catch (err) {
+      setError("Could not save draft. Please try again.");
+    }
+  }
 
   React.useEffect(() => {
     async function checkStatus() {
@@ -135,7 +216,7 @@ export default function BorrowerApply() {
     return true;
   }
 
-  function goNext() { if (validateStep(step) !== true) return; setStep((s) => s + 1); setError(""); setInfo(""); }
+  function goNext() { if (validateStep(step) !== true) return; autoSaveDraft(); setStep((s) => s + 1); setError(""); setInfo(""); }
   function goBack() { setStep((s) => s - 1); setError(""); setInfo(""); }
 
   async function onStartIdv() {
@@ -171,10 +252,12 @@ export default function BorrowerApply() {
     finally { setLoading(false); }
   }
 
-  function onContinueFromVerify() {
+  async function onContinueFromVerify() {
     if (idvStatus !== "verified") return setError("Please complete identity verification first.");
     if (bankStatus !== "connected") return setError("Please link your bank account first.");
-    setError(""); setStep(6);
+    setError("");
+    await autoSaveDraft();
+    setStep(6);
   }
 
   async function onSubmit() {
@@ -199,13 +282,20 @@ export default function BorrowerApply() {
       let borrowRequestId = null;
       try {
         const createRes = await createBorrowRequestApi({
-          title: title.trim(), category,
+          title: title.trim(),
+          category,
           reason_detailed: `${whatHappened.trim()}\n\nFunds usage: ${howFundsUsed.trim()}`,
           amount_requested_cents: Math.round(gbp * 100),
-          currency: "GBP", expected_return_days: days,
-          city: city.trim(), postcode: postcode.trim(),
+          currency: "GBP",
+          expected_return_days: days,
+          city: city.trim(),
+          postcode: postcode.trim(),
+          what_happened: whatHappened.trim(),
+          how_funds_used: howFundsUsed.trim(),
+          current_step: 7,
         });
         borrowRequestId = createRes?.borrowRequest?.id || createRes?.borrow_request?.id || createRes?.id;
+        if (borrowRequestId) setSubmittedBorrowRequestId(borrowRequestId);
       } catch (djangoErr) {
         console.error("Django API error:", djangoErr?.response?.data || djangoErr);
       }
@@ -250,6 +340,13 @@ export default function BorrowerApply() {
     return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${colors[status] || colors.none}`}>{label}</span>;
   }
 
+  // Endorsement invite (shown on success page)
+  const [endorseEmail, setEndorseEmail] = React.useState("");
+  const [endorseLoading, setEndorseLoading] = React.useState(false);
+  const [endorseSent, setEndorseSent] = React.useState(false);
+  const [endorseError, setEndorseError] = React.useState("");
+  const [submittedBorrowRequestId, setSubmittedBorrowRequestId] = React.useState(null);
+
   const totalSteps = 7;
 
   const stepLabels = ["Basics", "Your Story", "Amount & Terms", "Documents", "Verification", "Review Details", "Review Contract"];
@@ -278,6 +375,15 @@ export default function BorrowerApply() {
           </div>
         )}
 
+        {/* Draft banner */}
+        {draftBanner && (
+          <FadeIn>
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 text-center">
+              ✨ Resuming your saved draft...
+            </div>
+          </FadeIn>
+        )}
+
         {/* Page 1: Basics */}
         {step === 1 && (
           <FadeIn>
@@ -304,7 +410,10 @@ export default function BorrowerApply() {
                 </div>
                 <div className="text-xs text-[var(--color-text-subtle)]">Only your area/borough will be shown publicly — never your exact address.</div>
                 {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
-                <div className="flex justify-end"><Button onClick={goNext}>Continue</Button></div>
+                <div className="flex justify-between">
+                  <Button variant="outline" onClick={handleSaveAndExit}>Save &amp; Exit</Button>
+                  <Button onClick={goNext}>Continue</Button>
+                </div>
               </div>
             </Card>
           </FadeIn>
@@ -317,14 +426,14 @@ export default function BorrowerApply() {
               <div className="space-y-5">
                 <label className="block">
                   <div className="mb-2 text-sm font-semibold">What happened?</div>
-                  <textarea className="min-h-[140px] w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-base outline-none transition focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 placeholder:text-[var(--color-text-subtle)]"
+                  <textarea className="min-h-[140px] w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-base outline-none transition focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 placeholder:text-[var(--color-text-subtle)]"
                     value={whatHappened} onChange={(e) => setWhatHappened(e.target.value)}
                     placeholder="Explain your situation — what led to this need?" />
                   <div className="mt-1 text-xs text-[var(--color-text-subtle)]">{whatHappened.length}/2000 characters</div>
                 </label>
                 <label className="block">
                   <div className="mb-2 text-sm font-semibold">How will the funds be used?</div>
-                  <textarea className="min-h-[100px] w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-base outline-none transition focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 placeholder:text-[var(--color-text-subtle)]"
+                  <textarea className="min-h-[100px] w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-base outline-none transition focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 placeholder:text-[var(--color-text-subtle)]"
                     value={howFundsUsed} onChange={(e) => setHowFundsUsed(e.target.value)}
                     placeholder="What specifically will the money pay for?" />
                   <div className="mt-1 text-xs text-[var(--color-text-subtle)]">{howFundsUsed.length}/500 characters</div>
@@ -332,6 +441,7 @@ export default function BorrowerApply() {
                 {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
                 <div className="flex justify-between">
                   <Button variant="outline" onClick={goBack}>Back</Button>
+                  <Button variant="outline" onClick={handleSaveAndExit}>Save &amp; Exit</Button>
                   <Button onClick={goNext}>Continue</Button>
                 </div>
               </div>
@@ -376,6 +486,7 @@ export default function BorrowerApply() {
                 {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
                 <div className="flex justify-between">
                   <Button variant="outline" onClick={goBack}>Back</Button>
+                  <Button variant="outline" onClick={handleSaveAndExit}>Save &amp; Exit</Button>
                   <Button onClick={goNext}>Continue</Button>
                 </div>
               </div>
@@ -426,6 +537,7 @@ export default function BorrowerApply() {
                 {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
                 <div className="flex justify-between">
                   <Button variant="outline" onClick={goBack}>Back</Button>
+                  <Button variant="outline" onClick={handleSaveAndExit}>Save &amp; Exit</Button>
                   <Button onClick={goNext}>Continue</Button>
                 </div>
               </div>
@@ -478,8 +590,9 @@ export default function BorrowerApply() {
                 {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
                 {info && <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{info}</div>}
 
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <Button variant="outline" onClick={goBack}>Back</Button>
+                  <Button variant="outline" onClick={handleSaveAndExit}>Save &amp; Exit</Button>
                   <Button onClick={onContinueFromVerify} disabled={idvStatus !== "verified" || bankStatus !== "connected"}>Continue to Review</Button>
                 </div>
               </div>
@@ -547,8 +660,9 @@ export default function BorrowerApply() {
                 </div>
 
                 {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
-                <div className="flex justify-between pt-2">
+                <div className="flex justify-between gap-2 pt-2">
                   <Button variant="outline" onClick={goBack}>Back</Button>
+                  <Button variant="outline" onClick={handleSaveAndExit}>Save &amp; Exit</Button>
                   <Button onClick={goNext} disabled={!confirmAccurate || !confirmTerms || !confirmReview}>
                     Review Contract →
                   </Button>
@@ -574,7 +688,7 @@ export default function BorrowerApply() {
                   </p>
                 </div>
 
-                <div className="bg-white border border-[var(--color-border)] rounded-xl p-6 space-y-5 text-sm text-[var(--color-text-muted)]">
+                <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6 space-y-5 text-sm text-[var(--color-text-muted)]">
                   <h3 className="text-lg font-bold text-[var(--color-text)] font-heading">
                     Qard Hasan Agreement — Preview
                   </h3>
@@ -588,7 +702,7 @@ export default function BorrowerApply() {
 
                   <div>
                     <h4 className="font-semibold text-[var(--color-text)] mb-1">2. Nature of the Loan</h4>
-                    <p>This is a <strong>Qard Hasan</strong> — an interest-free goodwill loan. It is rooted in the Islamic tradition of benevolent lending but is open to all, regardless of faith. The lender extends this loan seeking no financial return beyond the repayment of the principal.</p>
+                    <p>This is a <strong>Qard Hasan</strong> (the benevolent loan) — an interest-free loan rooted in the Islamic tradition of compassionate lending, open to all regardless of faith. The lender extends this loan seeking no financial return beyond the repayment of the principal.</p>
                   </div>
 
                   <div>
@@ -627,14 +741,15 @@ export default function BorrowerApply() {
                 </div>
 
                 <div className="bg-amber-50 border border-amber-200/60 rounded-xl p-4 text-sm text-amber-800">
-                  <strong>Note:</strong> This is a preview. The final contract will be generated with full details (including the lender's name) once your request is funded. You will be asked to formally sign it before funds are released.
+                  <strong>Note:</strong> By submitting, you are pre-signing this contract as the borrower. The lender's name will be added once your request is funded. You will not need to sign again — the lender signs upon funding to complete the agreement.
                 </div>
 
                 {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
-                <div className="flex justify-between pt-2">
+                <div className="flex justify-between gap-2 pt-2">
                   <Button variant="outline" onClick={goBack}>Back</Button>
+                  <Button variant="outline" onClick={handleSaveAndExit}>Save &amp; Exit</Button>
                   <Button onClick={onSubmit} disabled={loading}>
-                    {loading ? "Submitting..." : "I Understand — Submit for Review"}
+                    {loading ? "Submitting..." : "Pre-sign & Submit for Review"}
                   </Button>
                 </div>
               </div>
@@ -659,6 +774,53 @@ export default function BorrowerApply() {
               </p>
               {info && <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 max-w-md mx-auto">{info}</div>}
               {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 max-w-md mx-auto">{error}</div>}
+
+              {/* Endorsement invite section */}
+              {submittedBorrowRequestId && !endorseSent && (
+                <div className="max-w-md mx-auto w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-3">
+                  <h3 className="text-base font-bold font-heading text-center">🤝 Strengthen your request</h3>
+                  <p className="text-sm text-[var(--color-text-muted)] text-center">
+                    Invite a community member (elder, imam, teacher) to endorse your request. This helps lenders trust you.
+                  </p>
+                  <Input
+                    value={endorseEmail}
+                    onChange={(e) => setEndorseEmail(e.target.value)}
+                    placeholder="Endorser's email address"
+                    type="email"
+                  />
+                  {endorseError && <div className="text-sm text-red-600">{endorseError}</div>}
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    disabled={endorseLoading}
+                    onClick={async () => {
+                      setEndorseError("");
+                      if (!endorseEmail.trim() || !endorseEmail.includes("@")) {
+                        setEndorseError("Please enter a valid email address.");
+                        return;
+                      }
+                      setEndorseLoading(true);
+                      try {
+                        await inviteEndorserApi(submittedBorrowRequestId, endorseEmail.trim());
+                        setEndorseSent(true);
+                      } catch (e) {
+                        setEndorseError(e?.response?.data?.detail || "Failed to send invite.");
+                      } finally {
+                        setEndorseLoading(false);
+                      }
+                    }}
+                  >
+                    {endorseLoading ? "Sending..." : "Send Endorsement Invite"}
+                  </Button>
+                  <p className="text-xs text-[var(--color-text-subtle)] text-center">This is optional — you can skip it.</p>
+                </div>
+              )}
+              {endorseSent && (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 max-w-md mx-auto text-center">
+                  ✉️ Invitation sent! Your endorser will receive an email with a link to vouch for your request.
+                </div>
+              )}
+
               <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
                 <Button variant="outline" onClick={() => navigate("/app/borrower")}>View Dashboard</Button>
                 <Button onClick={() => navigate("/app/home")}>Back to Home</Button>

@@ -105,6 +105,94 @@ h1, h2, h3 {
   font-family: var(--font-heading);
 }
 
+/* ─── Dark Mode ─── */
+.dark {
+  --color-bg: #0f0f0f;
+  --color-surface: #1a1a1a;
+  --color-surface-warm: #252218;
+  --color-text: #e8e4de;
+  --color-text-muted: #a0a0a0;
+  --color-text-subtle: #6a6a6a;
+  --color-border: #2a2520;
+  --color-border-light: #1f1c18;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+/* Dark overrides for hardcoded Tailwind bg/text colors */
+.dark .bg-white {
+  background-color: var(--color-surface) !important;
+}
+
+.dark .text-white {
+  color: #e8e4de !important;
+}
+
+/* Inputs & textareas */
+.dark textarea,
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="number"],
+.dark input[type="tel"],
+.dark input[type="url"],
+.dark input[type="search"],
+.dark input:not([type]) {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* Accent backgrounds — dark-friendly */
+.dark .bg-emerald-50 {
+  background-color: rgba(5, 150, 105, 0.1) !important;
+}
+.dark .bg-red-50 {
+  background-color: rgba(220, 38, 38, 0.1) !important;
+}
+.dark .bg-amber-50 {
+  background-color: rgba(217, 119, 6, 0.1) !important;
+}
+.dark .bg-blue-100 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+.dark .bg-orange-50 {
+  background-color: rgba(234, 88, 12, 0.1) !important;
+}
+.dark .bg-emerald-100 {
+  background-color: rgba(5, 150, 105, 0.15) !important;
+}
+
+/* Borders in dark mode for accent panels */
+.dark .border-emerald-200,
+.dark .border-emerald-200\/60,
+.dark .border-emerald-200\/40 {
+  border-color: rgba(5, 150, 105, 0.2) !important;
+}
+.dark .border-red-200 {
+  border-color: rgba(220, 38, 38, 0.2) !important;
+}
+.dark .border-amber-200,
+.dark .border-amber-200\/60 {
+  border-color: rgba(217, 119, 6, 0.2) !important;
+}
+
+/* Dark scrollbar */
+.dark ::-webkit-scrollbar-thumb {
+  background: #3a352e;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4a453e;
+}
+
+/* Dark selection */
+.dark ::selection {
+  background: rgba(5, 150, 105, 0.3);
+  color: #e8e4de;
+}
+
 /* ─── Selection ─── */
 ::selection {
   background: var(--color-emerald-200);

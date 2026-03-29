@@ -6,6 +6,7 @@ import Button from "../ui/Button.jsx";
 import Logo from "../ui/Logo.jsx";
 import { useAuthStore } from "../../state/authStore.js";
 import { logoutApi } from "../../api/endpoints.js";
+import { useTheme } from "../../hooks/useTheme.js";
 
 function IconMenu({ className = "" }) {
   return (
@@ -76,7 +77,7 @@ function Dropdown({ open, anchorRef, onClose, children, widthClass = "w-80" }) {
           exit={{ opacity: 0, y: 6, scale: 0.98 }}
           transition={{ duration: 0.16 }}
           className={`absolute right-0 top-full mt-2 ${widthClass} max-w-[92vw]
-            rounded-xl border border-[var(--color-border)] bg-white p-3
+            rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3
             shadow-[var(--shadow-lg)] z-50`}
         >
           {children}
@@ -92,6 +93,7 @@ export default function TopBar() {
 
   const { user, isAuthed, logout } = useAuthStore();
 
+  const { dark, toggle: toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [profileOpen, setProfileOpen] = React.useState(false);
   const [loggingOut, setLoggingOut] = React.useState(false);
@@ -133,7 +135,7 @@ export default function TopBar() {
   const avatarLetter = (displayName?.[0] || "F").toUpperCase();
 
   return (
-    <header className="sticky top-0 z-20 border-b border-[var(--color-border-light)] bg-white/90 backdrop-blur-lg">
+    <header className="sticky top-0 z-20 border-b border-[var(--color-border-light)] bg-[var(--color-surface)] backdrop-blur-lg">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 py-3">
         {/* Brand */}
         <div
@@ -160,6 +162,17 @@ export default function TopBar() {
 
         {/* Right actions */}
         <div className="flex items-center gap-2">
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-warm)] transition text-lg"
+            aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+            title={dark ? "Light mode" : "Dark mode"}
+          >
+            {dark ? "☀️" : "🌙"}
+          </button>
+
           {isAuthed ? (
             <>
               <Button
@@ -173,7 +186,7 @@ export default function TopBar() {
               {/* Profile dropdown */}
               <div className="relative" ref={profileAnchorRef}>
                 <button
-                  className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-border)] bg-white px-3 py-2 hover:bg-[var(--color-surface-warm)] transition"
+                  className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 hover:bg-[var(--color-surface-warm)] transition"
                   onClick={() => setProfileOpen((v) => !v)}
                   aria-label="Profile menu"
                   type="button"
@@ -196,6 +209,9 @@ export default function TopBar() {
                     </button>
                     <button className="w-full rounded-lg p-2.5 text-left text-sm hover:bg-[var(--color-surface-warm)] transition" onClick={() => go("/app/borrower/apply")} type="button">
                       Request a Loan
+                    </button>
+                    <button className="w-full rounded-lg p-2.5 text-left text-sm hover:bg-[var(--color-surface-warm)] transition" onClick={() => go("/app/settings")} type="button">
+                      Settings
                     </button>
                     {(user?.is_staff || user?.is_superuser) && (
                       <button className="w-full rounded-lg p-2.5 text-left text-sm hover:bg-[var(--color-surface-warm)] transition" onClick={() => go("/app/admin/requests")} type="button">
@@ -226,7 +242,7 @@ export default function TopBar() {
 
           {/* Mobile menu toggle */}
           <button
-            className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--color-border)] bg-white hover:bg-[var(--color-surface-warm)] transition"
+            className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-warm)] transition"
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Menu"
             type="button"
@@ -244,7 +260,7 @@ export default function TopBar() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.18 }}
-            className="md:hidden border-t border-[var(--color-border-light)] bg-white overflow-hidden"
+            className="md:hidden border-t border-[var(--color-border-light)] bg-[var(--color-surface)] overflow-hidden"
           >
             <div className="mx-auto max-w-6xl px-4 py-4 space-y-2">
               {[
@@ -274,6 +290,14 @@ export default function TopBar() {
                     type="button"
                   >
                     My Dashboard
+                  </button>
+
+                  <button
+                    className="w-full rounded-xl px-4 py-3 text-left text-base font-semibold transition bg-[var(--color-surface-warm)] text-[var(--color-text)]"
+                    onClick={() => go("/app/settings")}
+                    type="button"
+                  >
+                    Settings
                   </button>
 
                   <div className="grid grid-cols-2 gap-2 pt-2">

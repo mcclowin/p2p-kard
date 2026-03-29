@@ -3,6 +3,7 @@ from rest_framework import serializers
 from campaigns.models import Campaign
 from payments.models import Contribution
 from borrow.models import BorrowRequest
+from core.utils import prefixed_id
 
 
 # -------------------------
@@ -52,10 +53,13 @@ class CampaignCardSerializer(serializers.ModelSerializer):
 class CampaignDetailSerializer(serializers.ModelSerializer):
     """Detailed serializer for a campaign (used by core/api_serializers imports)."""
 
+    borrow_request_id = serializers.SerializerMethodField()
+
     class Meta:
         model = Campaign
         fields = [
             "id",
+            "borrow_request_id",
             "title_public",
             "story_public",
             "terms_public",
@@ -68,6 +72,9 @@ class CampaignDetailSerializer(serializers.ModelSerializer):
             "expected_return_days",
             "expected_return_date",
         ]
+
+    def get_borrow_request_id(self, obj):
+        return prefixed_id("br", getattr(obj, "borrow_request_id", None))
 
 
 class CreateCampaignSerializer(serializers.ModelSerializer):

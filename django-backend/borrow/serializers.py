@@ -8,6 +8,7 @@ from .models import BorrowDocument, BorrowRequest, BorrowRequestStatus
 
 class BorrowRequestCreateSerializer(CamelCaseSerializerMixin, serializers.ModelSerializer):
     id = serializers.SerializerMethodField()
+
     class Meta:
         model = BorrowRequest
         fields = [
@@ -18,6 +19,11 @@ class BorrowRequestCreateSerializer(CamelCaseSerializerMixin, serializers.ModelS
             "amount_requested_cents",
             "currency",
             "expected_return_days",
+            "city",
+            "postcode",
+            "what_happened",
+            "how_funds_used",
+            "current_step",
             "status",
             "created_at",
             "updated_at",
@@ -156,6 +162,54 @@ class DecisionSerializer(CamelCaseSerializerMixin, serializers.Serializer):
 
 class BorrowRequestStatusSerializer(CamelCaseSerializerMixin, serializers.Serializer):
     status = serializers.ChoiceField(choices=BorrowRequestStatus.choices)
+
+
+class BorrowDraftSerializer(CamelCaseSerializerMixin, serializers.ModelSerializer):
+    """For partial draft updates — all fields optional."""
+
+    class Meta:
+        model = BorrowRequest
+        fields = [
+            "title",
+            "category",
+            "reason_detailed",
+            "amount_requested_cents",
+            "currency",
+            "expected_return_days",
+            "city",
+            "postcode",
+            "what_happened",
+            "how_funds_used",
+            "current_step",
+        ]
+        extra_kwargs = {field: {"required": False} for field in fields}
+
+
+class BorrowDraftResponseSerializer(CamelCaseSerializerMixin, serializers.ModelSerializer):
+    id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BorrowRequest
+        fields = [
+            "id",
+            "title",
+            "category",
+            "reason_detailed",
+            "amount_requested_cents",
+            "currency",
+            "expected_return_days",
+            "city",
+            "postcode",
+            "what_happened",
+            "how_funds_used",
+            "current_step",
+            "status",
+            "created_at",
+            "updated_at",
+        ]
+
+    def get_id(self, obj):
+        return prefixed_id("br", obj.id)
 
 
 class BorrowRequestCreateResponseSerializer(CamelCaseSerializerMixin, serializers.Serializer):
