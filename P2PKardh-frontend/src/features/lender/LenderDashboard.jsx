@@ -158,7 +158,7 @@ export default function LenderDashboard() {
                       <div className="min-w-0">
                         <div className="text-base font-semibold font-heading break-words">{r.title}</div>
                         <div className="mt-1 text-sm text-[var(--color-text-muted)]">
-                          Amount: <strong>£{(r.amount_requested_cents / 100).toLocaleString()}</strong> • Repay: ~{r.expected_return_days} days
+                          Amount: <strong>£{((r.amount_requested_cents ?? r.amountRequestedCents ?? 0) / 100).toLocaleString()}</strong> • Repay: ~{r.expected_return_days ?? r.expectedReturnDays} days
                         </div>
                       </div>
                       <Pill tone={r.status === "VERIFIED" ? "good" : "neutral"}>{r.status}</Pill>

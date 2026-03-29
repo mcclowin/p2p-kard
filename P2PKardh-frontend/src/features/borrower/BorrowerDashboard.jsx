@@ -121,7 +121,8 @@ export default function BorrowerDashboard() {
                     const story = r.reason_detailed || [r.what_happened, r.how_funds_used].filter(Boolean).join("\n\nFunds usage: ");
                     const docCount = r.document_count ?? r.documents_count ?? r.documents?.length ?? 0;
                     const createdDate = r.created_at || r.createdAt;
-                    const amountGbp = r.amount_requested_cents ? (r.amount_requested_cents / 100) : 0;
+                    const amountCents = r.amount_requested_cents ?? r.amountRequestedCents ?? 0;
+                    const amountGbp = amountCents ? (amountCents / 100) : 0;
 
                     return (
                       <div key={r.id} className="rounded-xl border border-[var(--color-border)] overflow-hidden">

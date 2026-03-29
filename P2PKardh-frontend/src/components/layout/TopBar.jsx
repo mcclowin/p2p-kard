@@ -178,9 +178,9 @@ export default function TopBar() {
               <Button
                 size="sm"
                 className="hidden sm:inline-flex"
-                onClick={() => go("/app/borrower/apply")}
+                onClick={() => go("/app/home")}
               >
-                Request a Loan
+                Lend a Hand
               </Button>
 
               {/* Profile dropdown */}

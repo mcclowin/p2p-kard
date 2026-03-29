@@ -157,6 +157,28 @@ export default function CampaignDetails() {
           </Card>
         </FadeIn>
 
+        {/* Contract Preview */}
+        <FadeIn delay={0.11}>
+          <Card title="📜 Loan Agreement Preview">
+            <div className="space-y-4 text-sm text-[var(--color-text-muted)]">
+              <p>
+                If you fund this loan, a formal <strong className="text-[var(--color-text)]">Qard Hasan</strong> (benevolent loan) agreement will be created between you and the borrower, with HandUp as witness.
+              </p>
+              <div className="rounded-lg bg-[var(--color-surface-warm)] p-4 space-y-3">
+                <div><strong className="text-[var(--color-text)]">Nature:</strong> Qard Hasan — the benevolent loan. Interest-free, rooted in compassion.</div>
+                <div><strong className="text-[var(--color-text)]">Amount:</strong> £{(needed / 100).toLocaleString()}</div>
+                <div><strong className="text-[var(--color-text)]">Repayment:</strong> Single repayment within {campaign.expected_return_days} days</div>
+                <div><strong className="text-[var(--color-text)]">Zero Interest:</strong> No interest, late fees, hidden charges, or conditional benefits shall apply.</div>
+                <div><strong className="text-[var(--color-text)]">Hardship:</strong> If the borrower faces genuine hardship, you may choose to extend or forgive — an act of virtue.</div>
+                <div><strong className="text-[var(--color-text)]">Platform Role:</strong> HandUp acts as facilitator and witness, not a party to the loan.</div>
+              </div>
+              <p className="text-xs text-[var(--color-text-subtle)]">
+                The borrower has pre-signed this agreement upon submission. By funding the loan, you sign as the lender and the contract becomes active.
+              </p>
+            </div>
+          </Card>
+        </FadeIn>
+
         {/* Community Endorsement */}
         {endorsements.length > 0 && (
           <FadeIn delay={0.12}>
