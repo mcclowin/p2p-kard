@@ -49,7 +49,7 @@ function CampaignCard({ c, onOpen, onSupport }) {
 
   return (
     <div
-      className="group h-full rounded-2xl border border-[var(--color-border)] bg-white p-5 sm:p-6 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] transition-all duration-300 cursor-pointer flex flex-col"
+      className="group h-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-6 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] transition-all duration-300 cursor-pointer flex flex-col"
       onClick={onOpen}
     >
       <div className="flex items-start justify-between gap-3">
@@ -112,7 +112,7 @@ function CampaignCard({ c, onOpen, onSupport }) {
 function QardHasanExplainer() {
   return (
     <FadeIn delay={0.15}>
-      <div className="rounded-2xl border border-emerald-200/40 bg-gradient-to-br from-emerald-50/80 via-white to-[var(--color-gold-50)] p-8 sm:p-10 shadow-[var(--shadow-sm)]">
+      <div className="rounded-2xl border border-emerald-200/40 bg-gradient-to-br from-emerald-50/80 via-[var(--color-surface)] to-[var(--color-gold-50)] p-8 sm:p-10 shadow-[var(--shadow-sm)]">
         <h2 className="text-2xl font-bold text-emerald-900 font-heading">What is Qard Hasan?</h2>
         <p className="mt-4 text-[var(--color-text-muted)] leading-relaxed max-w-2xl">
           <em className="text-emerald-800">Qard Hasan</em> (قرض حسن) means "the benevolent loan" — an interest-free loan given purely
@@ -130,7 +130,7 @@ function QardHasanExplainer() {
             { icon: "🛡️", title: "Identity Protected", desc: "Dignity preserved always" },
             { icon: "🏘️", title: "Community-Powered", desc: "Neighbours helping neighbours" },
           ].map((item) => (
-            <div key={item.title} className="rounded-xl bg-white/80 border border-[var(--color-border-light)] p-4 text-center shadow-[var(--shadow-sm)]">
+            <div key={item.title} className="rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-light)] p-4 text-center shadow-[var(--shadow-sm)]">
               <div className="text-2xl">{item.icon}</div>
               <div className="mt-2 text-sm font-semibold text-[var(--color-text)]">{item.title}</div>
               <div className="mt-1 text-xs text-[var(--color-text-muted)]">{item.desc}</div>
@@ -179,7 +179,7 @@ function HowItWorks() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step) => (
-            <div key={step.num} className="rounded-2xl border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-sm)] text-center">
+            <div key={step.num} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-sm)] text-center">
               <div className="text-3xl mb-3">{step.icon}</div>
               <div className="text-xs font-bold text-emerald-600 tracking-wider uppercase mb-2">Step {step.num}</div>
               <h3 className="text-base font-semibold font-heading">{step.title}</h3>
@@ -225,7 +225,7 @@ function LocationFilter({ onFilter, onClear, activeArea }) {
   }
 
   return (
-    <div className="rounded-xl border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-sm)]">
+    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-[var(--shadow-sm)]">
       <div className="flex flex-col sm:flex-row gap-3 items-end">
         <div className="flex-1 min-w-0">
           <label className="block">
@@ -234,7 +234,7 @@ function LocationFilter({ onFilter, onClear, activeArea }) {
               Find campaigns near you
             </div>
             <input
-              className="w-full rounded-xl border border-[var(--color-border)] px-4 py-2.5 text-sm bg-white outline-none transition focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 placeholder:text-[var(--color-text-subtle)]"
+              className="w-full rounded-xl border border-[var(--color-border)] px-4 py-2.5 text-sm bg-[var(--color-surface)] outline-none transition focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 placeholder:text-[var(--color-text-subtle)]"
               value={postcode}
               onChange={(e) => setPostcode(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleLookup()}

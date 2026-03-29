@@ -179,6 +179,46 @@ h1, h2, h3 {
   border-color: rgba(217, 119, 6, 0.2) !important;
 }
 
+/* Dark gradient overrides */
+.dark .from-emerald-50\/80 {
+  --tw-gradient-from: rgba(5, 150, 105, 0.12) !important;
+}
+.dark .from-amber-50\/60 {
+  --tw-gradient-from: rgba(217, 119, 6, 0.1) !important;
+}
+.dark .from-emerald-50 {
+  --tw-gradient-from: rgba(5, 150, 105, 0.1) !important;
+}
+.dark .to-amber-50\/40 {
+  --tw-gradient-to: rgba(217, 119, 6, 0.06) !important;
+}
+
+/* Dark text overrides for hardcoded colors */
+.dark .text-slate-900 {
+  color: var(--color-text) !important;
+}
+.dark .text-slate-800 {
+  color: var(--color-text) !important;
+}
+.dark .text-slate-700 {
+  color: var(--color-text-muted) !important;
+}
+.dark .text-slate-600 {
+  color: var(--color-text-muted) !important;
+}
+.dark .text-slate-500 {
+  color: var(--color-text-subtle) !important;
+}
+.dark .bg-slate-50 {
+  background-color: var(--color-surface-warm) !important;
+}
+.dark .bg-slate-100 {
+  background-color: var(--color-surface-warm) !important;
+}
+.dark .border-slate-200 {
+  border-color: var(--color-border) !important;
+}
+
 /* Dark scrollbar */
 .dark ::-webkit-scrollbar-thumb {
   background: #3a352e;
