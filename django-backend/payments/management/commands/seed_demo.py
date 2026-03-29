@@ -123,7 +123,7 @@ class Command(BaseCommand):
         # Get or create a demo borrower
         demo_user, _ = User.objects.get_or_create(
             email="demo-borrower@handup.local",
-            defaults={"first_name": "Demo", "last_name": "Borrower", "role": "borrower"},
+            defaults={"name": "Demo Borrower"},
         )
 
         created = 0
@@ -133,14 +133,13 @@ class Command(BaseCommand):
                 continue
 
             br = BorrowRequest.objects.create(
-                user=demo_user,
+                requester=demo_user,
                 title=c["title"],
                 category=c["category"],
-                situation=c["story"],
-                use_of_funds=c["story"][:100],
-                amount_cents=c["amount"],
+                reason_detailed=c["story"],
+                amount_requested_cents=c["amount"],
                 currency=c["currency"],
-                return_days=c["return_days"],
+                expected_return_days=c["return_days"],
                 city=c["location_area"].split(",")[0].strip(),
                 postcode="",
                 status="VERIFIED",
