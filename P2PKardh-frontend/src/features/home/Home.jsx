@@ -112,7 +112,7 @@ function CampaignCard({ c, onOpen, onSupport }) {
 function QardHasanExplainer() {
   return (
     <FadeIn delay={0.15}>
-      <div className="rounded-2xl border border-emerald-200/40 bg-[var(--color-surface-warm)] p-8 sm:p-10 shadow-[var(--shadow-sm)]">
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8 sm:p-10 shadow-[var(--shadow-md)]">
         <h2 className="text-2xl font-bold text-emerald-900 font-heading">What is Qard Hasan?</h2>
         <p className="mt-4 text-[var(--color-text-muted)] leading-relaxed max-w-2xl">
           <em className="text-emerald-800">Qard Hasan</em> (قرض حسن) means "the benevolent loan" — an interest-free loan given purely
