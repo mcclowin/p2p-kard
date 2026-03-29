@@ -57,7 +57,14 @@ DEMO_CAMPAIGNS = [
         "currency": "GBP",
         "return_days": 45,
         "location_area": "Salford, Manchester",
-        "endorsement": None,
+        "endorsement": {
+            "name": "Ahmed Khan",
+            "title": "Imam",
+            "affiliation": "Salford Islamic Centre",
+            "vouch": "This brother has been a regular member of our community for years. He was recently made redundant through no fault of his own and has already secured new employment. His need is temporary and genuine. I'm confident in his commitment to repay.",
+            "contact_method": "phone",
+            "email": "ahmed.khan@example.com",
+        },
     },
     {
         "title": "School uniform and supplies",
@@ -84,7 +91,14 @@ DEMO_CAMPAIGNS = [
         "currency": "GBP",
         "return_days": 30,
         "location_area": "Toxteth, Liverpool",
-        "endorsement": None,
+        "endorsement": {
+            "name": "Amina Osei",
+            "title": "Career Advisor",
+            "affiliation": "Liverpool Skills Centre",
+            "vouch": "I've been advising this young man on his career progression. The promotion is real and the certification is a genuine requirement. This is a smart investment that will pay for itself within the first month of his new salary. I fully support this request.",
+            "contact_method": "email",
+            "email": "amina.osei@example.com",
+        },
     },
 ]
 

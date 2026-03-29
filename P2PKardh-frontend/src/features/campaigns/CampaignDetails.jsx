@@ -41,8 +41,9 @@ export default function CampaignDetails() {
         if (brId) {
           try {
             const endRes = await getEndorsementsForRequestApi(brId);
+            console.log("Endorsements response:", endRes);
             if (alive) setEndorsements(endRes.endorsements || []);
-          } catch { /* endorsements not available, that's fine */ }
+          } catch (endErr) { console.log("Endorsements fetch failed:", endErr?.response?.status, endErr?.message); }
         }
       } catch (e) {
         if (!alive) return;
