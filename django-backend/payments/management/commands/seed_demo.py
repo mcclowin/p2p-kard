@@ -3,12 +3,15 @@ Seed demo campaigns for development/testing.
 Usage: python manage.py seed_demo
 Add --clear to remove existing demo data first.
 """
+import secrets
+
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from datetime import timedelta
 from accounts.models import User
 from borrow.models import BorrowRequest, Currency
 from campaigns.models import Campaign, CampaignStatus
+from endorsements.models import Endorsement, EndorsementStatus
 
 
 DEMO_CAMPAIGNS = [
@@ -20,6 +23,14 @@ DEMO_CAMPAIGNS = [
         "currency": "GBP",
         "return_days": 90,
         "location_area": "Hackney, London",
+        "endorsement": {
+            "name": "Ibrahim Hassan",
+            "title": "Community Elder",
+            "affiliation": "East London Mosque",
+            "vouch": "I have known this sister for over 4 years through our community. She is a hard-working single mother who always fulfils her commitments. Her dental situation is genuine and urgent. I trust she will honour the repayment.",
+            "contact_method": "phone",
+            "email": "ibrahim.hassan@example.com",
+        },
     },
     {
         "title": "Car repair to keep my job",
@@ -29,6 +40,14 @@ DEMO_CAMPAIGNS = [
         "currency": "GBP",
         "return_days": 60,
         "location_area": "Bradford, West Yorkshire",
+        "endorsement": {
+            "name": "Fatima Begum",
+            "title": "Social Worker",
+            "affiliation": "Bradford Community Support",
+            "vouch": "I've been working with this family for the past year. The father is genuinely committed to providing for his family and the car is essential for his night-shift work. This is a straightforward need with a clear repayment path.",
+            "contact_method": "email",
+            "email": "fatima.begum@example.com",
+        },
     },
     {
         "title": "Rent shortfall after redundancy",
@@ -38,6 +57,7 @@ DEMO_CAMPAIGNS = [
         "currency": "GBP",
         "return_days": 45,
         "location_area": "Salford, Manchester",
+        "endorsement": None,
     },
     {
         "title": "School uniform and supplies",
@@ -47,6 +67,14 @@ DEMO_CAMPAIGNS = [
         "currency": "GBP",
         "return_days": 42,
         "location_area": "Small Heath, Birmingham",
+        "endorsement": {
+            "name": "Yusuf Ali",
+            "title": "Head Teacher",
+            "affiliation": "Al-Noor Primary School",
+            "vouch": "Both children are enrolled at our school starting next term. I can confirm the uniform requirements and costs. The family is well-known to us and I'm confident the funds will be used as described.",
+            "contact_method": "email",
+            "email": "yusuf.ali@example.com",
+        },
     },
     {
         "title": "Professional certification course",
@@ -56,6 +84,7 @@ DEMO_CAMPAIGNS = [
         "currency": "GBP",
         "return_days": 30,
         "location_area": "Toxteth, Liverpool",
+        "endorsement": None,
     },
 ]
 
@@ -68,8 +97,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options["clear"]:
-            Campaign.objects.filter(title_public__in=[c["title"] for c in DEMO_CAMPAIGNS]).delete()
-            self.stdout.write(self.style.WARNING("Cleared existing demo campaigns"))
+            titles = [c["title"] for c in DEMO_CAMPAIGNS]
+            # Delete endorsements linked to demo borrow requests
+            from borrow.models import BorrowRequest as BR
+            demo_brs = BR.objects.filter(title__in=titles)
+            Endorsement.objects.filter(borrow_request__in=demo_brs).delete()
+            Campaign.objects.filter(title_public__in=titles).delete()
+            demo_brs.delete()
+            self.stdout.write(self.style.WARNING("Cleared existing demo campaigns + endorsements"))
 
         # Get or create a demo borrower
         demo_user, _ = User.objects.get_or_create(
@@ -110,6 +145,25 @@ class Command(BaseCommand):
                 status=CampaignStatus.RUNNING,
                 verified=True,
             )
+
+            # Create endorsement if provided
+            end = c.get("endorsement")
+            if end:
+                Endorsement.objects.create(
+                    borrow_request=br,
+                    invite_token=secrets.token_urlsafe(32),
+                    invite_email=end["email"],
+                    endorser_name=end["name"],
+                    endorser_title=end["title"],
+                    endorser_affiliation=end["affiliation"],
+                    vouch_text=end["vouch"],
+                    contact_method=end["contact_method"],
+                    contact_value=end["email"],
+                    status=EndorsementStatus.COMPLETED,
+                    completed_at=timezone.now(),
+                )
+                self.stdout.write(f"    🤝 Endorsed by {end['name']}")
+
             created += 1
             self.stdout.write(self.style.SUCCESS(f"  ✅ Created: {c['title']} ({c['location_area']})"))
 
