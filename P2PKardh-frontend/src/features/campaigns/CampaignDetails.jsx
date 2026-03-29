@@ -7,17 +7,6 @@ import { Page, FadeIn } from "../../components/ui/Motion.jsx";
 import { campaignDetailApi, getEndorsementsForRequestApi, requestEndorserContactApi } from "../../api/endpoints.js";
 import { useAuthStore } from "../../state/authStore.js";
 
-function ProgressBar({ value = 0 }) {
-  return (
-    <div className="h-3 w-full rounded-full bg-emerald-100">
-      <div
-        className="h-3 rounded-full bg-emerald-600 transition-all duration-500"
-        style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
-      />
-    </div>
-  );
-}
-
 function StatBox({ label, value, accent = false }) {
   return (
     <div className="rounded-xl bg-[var(--color-surface-warm)] p-5">
@@ -92,7 +81,7 @@ export default function CampaignDetails() {
   const pooled = Number(campaign.amount_pooled_cents ?? 0);
   const campaignId = campaign.campaign_id ?? campaign.id ?? campaign.uuid ?? campaign.campaign_uuid;
   const locationArea = campaign.location_area ?? campaign.locationArea;
-  const pct = needed > 0 ? Math.round((pooled / needed) * 100) : 0;
+  // 1:1 lending model — no progress bar needed
 
   return (
     <Page>
@@ -127,14 +116,17 @@ export default function CampaignDetails() {
 
             <h1 className="text-2xl sm:text-3xl font-bold font-heading leading-tight">{campaign.title_public}</h1>
 
-            {/* Progress */}
-            <div className="mt-6 space-y-3">
-              <div className="grid gap-4 sm:grid-cols-3">
-                <StatBox label="Needed" value={`£${(needed / 100).toLocaleString()}`} />
-                <StatBox label="Raised" value={`£${(pooled / 100).toLocaleString()}`} accent />
-                <StatBox label="Progress" value={`${pct}%`} />
+            {/* Loan details */}
+            <div className="mt-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <StatBox label="Loan Amount" value={`£${(needed / 100).toLocaleString()}`} accent />
+                <StatBox label="Repay Within" value={`${campaign.expected_return_days} days`} />
               </div>
-              <ProgressBar value={pct} />
+              {pooled >= needed && needed > 0 && (
+                <div className="mt-3 rounded-lg bg-emerald-50 border border-emerald-200/60 p-3 text-center text-sm font-semibold text-emerald-700">
+                  ✓ Fully funded by a single lender
+                </div>
+              )}
             </div>
           </div>
         </FadeIn>

@@ -73,6 +73,7 @@ class InviteEndorserView(APIView):
 class EndorsementDetailView(APIView):
     """GET — public, get endorsement by invite_token."""
 
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, invite_token):
@@ -127,6 +128,7 @@ class CompleteEndorsementView(APIView):
 class EndorsementByBorrowRequestView(APIView):
     """GET — public, get completed endorsements for a borrow request."""
 
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, borrow_request_id):

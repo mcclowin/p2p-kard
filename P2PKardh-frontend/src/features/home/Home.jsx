@@ -79,12 +79,14 @@ function CampaignCard({ c, onOpen, onSupport }) {
       </div>
 
       <div className="mt-auto pt-5 space-y-2">
-        <div className="flex justify-between text-sm">
-          <span className="font-semibold text-emerald-700">£{c.pooled.toLocaleString()}</span>
-          <span className="text-[var(--color-text-muted)]">of £{c.amountNeeded.toLocaleString()}</span>
+        <div className="flex justify-between text-sm items-center">
+          <span className="text-lg font-bold font-heading text-emerald-700">£{c.amountNeeded.toLocaleString()}</span>
+          {c.pooled >= c.amountNeeded && c.amountNeeded > 0 ? (
+            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 rounded-full px-2.5 py-0.5">✓ Funded</span>
+          ) : (
+            <span className="text-xs text-[var(--color-text-muted)]">Needs 1 lender</span>
+          )}
         </div>
-        <ProgressBar value={pct} />
-        <div className="text-xs text-[var(--color-text-subtle)]">{pct}% funded</div>
       </div>
 
       <div className="mt-4">
