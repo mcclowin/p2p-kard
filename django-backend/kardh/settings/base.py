@@ -8,7 +8,8 @@ env = environ.Env(
 )
 
 env_file = env.str("ENV_FILE", default=str(BASE_DIR / ".env"))
-environ.Env.read_env(env_file)
+if Path(env_file).is_file():
+    environ.Env.read_env(env_file)
 
 
 SECRET_KEY = env.str("SECRET_KEY", default="django-insecure-change-me")
@@ -86,7 +87,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATICFILES_DIRS = [d for d in [BASE_DIR / "static"] if d.is_dir()]
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
