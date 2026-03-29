@@ -13,7 +13,7 @@ COPY . /app/
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 8000
+EXPOSE ${PORT:-8000}
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["gunicorn", "kardh.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["sh", "-c", "gunicorn kardh.wsgi:application --bind 0.0.0.0:${PORT:-8000}"]
